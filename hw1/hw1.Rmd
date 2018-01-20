@@ -40,13 +40,14 @@ Use Linux shell commands to answer following questions.
 1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?
 ```{bash}
 wc -l /home/m280-data/hw1/merge-geno.fam
-# 959=n
+# 959=n, using wc -l to count number of rows in .fam file
 wc -l /home/m280-data/hw1/merge-geno.bim
-# 8348674=p
+# 8348674=p using wc -l to count number of rows in .bim file
 ```
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
 ```{bash}
 awk -F" " '!_[$1]++' /home/m280-data/hw1/merge-geno.bim | awk '{print $1}'
+#1
 #3
 #5
 #7
