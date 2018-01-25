@@ -6,7 +6,7 @@
 rep = 50
 seednum=280
 nVals = seq(100, 500, by=100)
-distTypes = c("gaussian", "t1", "t5")
+distTypes = c("'gaussian'", "'t1'", "'t5'")
 for (i in distTypes){
   for (n in nVals) {
     oFile = paste(distTypes,"_n_", n, ".txt", sep="")
