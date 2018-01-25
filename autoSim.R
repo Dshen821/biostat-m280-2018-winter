@@ -1,5 +1,10 @@
 # autoSim.R
 
+#Modify the autoSim.R script to run simulations with combinations of sample sizes
+#nVals = seq(100, 500, by=100) and distributions  distTypes = c("gaussian", "t1", "t5")
+#and write output to appropriately named files. Use rep = 50, and seed = 280
+
+
 nVals = seq(100, 500, by=100)
 for (n in nVals) {
   oFile = paste("n", n, ".txt", sep="")
