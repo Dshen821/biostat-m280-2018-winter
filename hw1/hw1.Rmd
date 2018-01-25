@@ -59,18 +59,6 @@ awk -F" " '!_[$1]++' /home/m280-data/hw1/merge-geno.bim | awk '{print $1}'
 #19
 #21
 awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq -c 
-
-<!-- 1309299 1 -->
-<!-- 1215399 3 -->
-<!-- 1090185 5 -->
-<!-- 980944 7 -->
-<!-- 732013 9 -->
-<!-- 815860 11 -->
-<!-- 602809 13 -->
-<!-- 491208 15 -->
-<!-- 477990 17 -->
-<!-- 393615 19 -->
-<!--  239352 21 -->
  ```
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
 ```{bash}
@@ -87,7 +75,7 @@ awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769) print}' /home/m280-data/h
     
     awk 'BEGIN{print "    2.40 = FILE FORMAT VERSION NUMBER.\n8348674 = NUMBER OF SNPS LISTED HERE." }{print $2 "," $1 "," $4}' /home/m280-data/hw1/merge-geno.bim > mendel_snpdef.txt
 
-head -8 mendel_snpdef.txt
+head -10 mendel_snpdef.txt
 
     ```
     
@@ -114,6 +102,7 @@ $$
   \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - \mu_{\text{true}})^2}{\text{rep}}
 $$
 for both methods.
+
 
 2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
 
