@@ -1,12 +1,16 @@
+---
+title: "Homework #1"
+author: Darrick Shen
+date: 01/26/2018
+output: html_document
+---
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = TRUE)
 ```
----
-title: "Homework #1"
-author: "Darrick Shen"
-date:
-output: html_document
+
 ---
 ## Q1. Git/GitHub
 
