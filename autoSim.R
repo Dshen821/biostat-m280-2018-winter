@@ -4,7 +4,7 @@
 #nVals = seq(100, 500, by=100) and distributions  distTypes = c("gaussian", "t1", "t5")
 #and write output to appropriately named files. Use rep = 50, and seed = 280
 rep = 50
-seednum=280
+seed=280
 nVals = seq(100, 500, by=100)
 distributions = c("gaussian", "t1", "t5")
 for (n in nVals){
