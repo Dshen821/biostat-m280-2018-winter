@@ -1,11 +1,12 @@
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
 ```
 ---
-title: "Darrick Shen"
-author:
+title: "Homework #1"
+author: "Darrick Shen"
 date:
-output:
+output: html_document
 ---
 ## Q1. Git/GitHub
 
@@ -51,24 +52,28 @@ Use Linux shell commands to answer following questions.
 
 1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?
 ```{bash}
-wc -l /home/m280-data/hw1/merge-geno.fam
+wc -l < /home/m280-data/hw1/merge-geno.fam
 # n=959, using wc -l to count number of rows in .fam file
-wc -l /home/m280-data/hw1/merge-geno.bim
+wc -l < /home/m280-data/hw1/merge-geno.bim
 # p=8348674 using wc -l to count number of rows in .bim file
 ```
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
 ```{bash}
 awk -F" " '!_[$1]++' /home/m280-data/hw1/merge-geno.bim | awk '{print $1}'
 #Chromosomes in this data set: 3,5,7,9,11,13,15,17,19,21
-
+```
+(SNPS, Chromosome #)
+```{bash}
 awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq -c 
 #(Number of SNPS, Chromosome #)
- ```
+```
+
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
 ```{bash}
 awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769) print}' /home/m280-data/hw1/merge-geno.bim | wc -l
 #894 SNPS located within MAP4 gene
 ```
+
 
 4. Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <http://www.genetics.ucla.edu/software/mendel>, we have to reformat the data set to be read by Mendel.
 
@@ -77,11 +82,13 @@ awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769) print}' /home/m280-data/h
       with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like
     ```{bash, echo=FALSE, eval=TRUE}
     
-    awk 'BEGIN{print "    2.40 = FILE FORMAT VERSION NUMBER.\n8348674 = NUMBER OF SNPS LISTED HERE." }{print $2 "," $1 "," $4}' /home/m280-data/hw1/merge-geno.bim > mendel_snpdef.txt
+    awk 'BEGIN{print "    2.40 = FILE FORMAT VERSION NUMBER.  \
+    \n8348674 = NUMBER OF SNPS LISTED HERE." }{print $2 "," $1 "," $4}'  \
+    /home/m280-data/hw1/merge-geno.bim > mendel_snpdef.txt
 
-head -10 mendel_snpdef.txt
-
+    head -10 mendel_snpdef.txt
     ```
+
     
     - Mendel's pedigree file is similar to the plink `fam` file but has format  
     `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status`  
@@ -93,6 +100,7 @@ awk  '{OFS=","}{print $1,$2,$3,$4,$5,$6}' /home/m280-data/hw1/merge-geno.fam|sed
     
     ```
 
+
 ## Q3. R Batch Run
 
 In class we discussed using R to organize simulation studies. 
@@ -103,8 +111,14 @@ $$
 $$
 for both methods.
 
+```{bash}
+Rscript runSim.R
+```
 
 2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
+```{bash}
+Rscript autoSim.R
+```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 
@@ -121,3 +135,26 @@ for both methods.
 | 500 | PrimeAvg |       |       |          |
 |     | SampAvg  |       |       |          |
 
+```{r}
+dat <- lapply(Sys.glob("*_.txt"), read.table)
+
+unl_dat <- matrix(unlist(dat), byrow = TRUE, ncol = 3)[, -1]; 
+unl_dat2 <- unl_dat[c(6:15, 1:5), c(2, 1)]; 
+unl_dat2_trans <- c(t(unl_dat2)) #transpose
+matdat <- matrix(unl_dat2_trans, nrow = 10)
+
+datfrmdat <- as.data.frame(matdat)
+avgNames <- rep(c("Prime", "Class"), times = 5)
+nObs <- rep(c(100, 200, 300, 400, 500), each = 2)
+labeled_datfrmdat <- cbind(nObs, avgNames, datfrmdat)
+colnames(labeled_datfrmdat) <- c("n", "Method", "t1", "t5", "Gaussian")
+library(knitr)
+kable(labeled_datfrmdat)
+
+```
+
+
+
+```{bash, echo=TRUE, results='asis'}
+    Rscript tablecons.R
+```
