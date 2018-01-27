@@ -54,19 +54,24 @@ Please, do **not** put these data files into Git; they are huge. You even don't 
 
 Use Linux shell commands to answer following questions. 
 
-1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?
+1. How many persons are in the data set (statisticians call this `n`)?
 ```{bash}
 wc -l < /home/m280-data/hw1/merge-geno.fam
 # n=959, using wc -l to count number of rows in .fam file
+```
+How many SNPs are in the data set (statisticians call this `p`)?
+```{bash}
 wc -l < /home/m280-data/hw1/merge-geno.bim
 # p=8348674 using wc -l to count number of rows in .bim file
 ```
-2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
+2. Which chromosomes does this data set contain? 
 ```{bash}
 awk -F" " '!_[$1]++' /home/m280-data/hw1/merge-geno.bim | awk '{print $1}'
 #Chromosomes in this data set: 3,5,7,9,11,13,15,17,19,21
 ```
-(SNPS, Chromosome #)
+How many SNPs are in each chromosome?
+
+(Total SNPS, Corresponding Chromosome #)
 ```{bash}
 awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq -c 
 #(Number of SNPS, Chromosome #)
@@ -74,7 +79,8 @@ awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq -c
 
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
 ```{bash}
-awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769) print}' /home/m280-data/hw1/merge-geno.bim | wc -l
+awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769) print}'  \
+/home/m280-data/hw1/merge-geno.bim | wc -l
 #894 SNPS located within MAP4 gene
 ```
 
