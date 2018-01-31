@@ -1,7 +1,7 @@
 ---
-title: "Homework #1"
+title: "BIOSTAT-M80: Homework #1"
 author: Darrick Shen
-date: 01/26/2018
+subtitle: Due Feb 2 @ 11:59PM
 output: html_document
 ---
 
@@ -11,33 +11,33 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = TRUE)
 ```
 
----
 ## Q1. Git/GitHub
 
 **No handwritten homework reports are accepted for this course.** We work with Git and GitHub. Efficient and abundant use of Git, e.g., frequent and well-documented commits, is an important criterion for grading your homework.
 
 1. Apply for the [Student Developer Pack](https://education.github.com/pack) at GitHub using your UCLA email.
 
-This was done on 01/17/2018.
+    This was done on 01/17/2018.
 
 2. Create a **private** repository `biostat-m280-2018-winter` and add `Hua-Zhou` and `juhkim111` as your collaborators with write permission.
 
-This was done on 01/17/2018.
+    This was done on 01/17/2018.
 
 3. Top directories of the repository should be `hw1`, `hw2`, ... Maintain two branches `master` and `develop`. The `develop` branch will be your main playground, the place where you develop solution (code) to homework problems and write up report. The `master` branch will be your presentation area. Submit your homework files (R markdown file `Rmd`, `html` file converted from R markdown, all code and data sets to reproduce results) in `master` branch.
 
-This was done on 01/17/2018.
+    This was done on 01/17/2018.
 
 4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time. That means if you tag your `hw1` submission after deadline, penalty points will be deducted for late submission.
 
-This was done on 01/17/2018. (Tagging will be done upon submission)
+    This was done on 01/17/2018. (Tagging will be done upon submission)
+    
 ## Q2. Linux Shell Commands
 
 The `35.227.165.60:/home/m280-data/hw1` folder contains a typical genetic data set in plink format. If interested, you can read plink documentation at <http://zzz.bwh.harvard.edu/plink/>. But it's definitely not necessary for this homework.
 
 - `merge-geno.bim` contains information of each genetic marker (SNP). Each line is a SNP and has 6 fields:  
 `Chromosome`, `SNP ID`, `Genetic Distance (morgan)`, `Base Pair Position (bp)`, `Allele 1`, `Allele 2`.
-    ```{bash}
+    ```{bash, echo=TRUE, eval=TRUE}
     head /home/m280-data/hw1/merge-geno.bim
     ```
 
@@ -55,15 +55,20 @@ Please, do **not** put these data files into Git; they are huge. You even don't 
 Use Linux shell commands to answer following questions. 
 
 1. How many persons are in the data set (statisticians call this `n`)?
-```{bash}
-wc -l < /home/m280-data/hw1/merge-geno.fam
-# n=959, using wc -l to count number of rows in .fam file
-```
+
+    The number of persons in the merge-geno.fam data set are:
+    ```{bash}
+    wc -l < /home/m280-data/hw1/merge-geno.fam
+    # n=959, using wc -l to count number of rows in .fam file
+    ```
 How many SNPs are in the data set (statisticians call this `p`)?
-```{bash}
-wc -l < /home/m280-data/hw1/merge-geno.bim
-# p=8348674 using wc -l to count number of rows in .bim file
-```
+    
+    The number of SNPS in the merge-geno.bim data set are:
+
+    ```{bash}
+    wc -l < /home/m280-data/hw1/merge-geno.bim
+    # p=8348674 using wc -l to count number of rows in .bim file
+    ```
 2. Which chromosomes does this data set contain? 
 ```{bash}
 awk -F" " '!_[$1]++' /home/m280-data/hw1/merge-geno.bim | awk '{print $1}'
@@ -121,9 +126,7 @@ $$
 $$
 for both methods.
 
-```{bash}
-Rscript runSim.R
-```
+
 
 2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
 ```{bash}
