@@ -1,12 +1,11 @@
-## parsing command arguments
 for (arg in commandArgs(TRUE)) {
-  eval(parse(text=arg))
+  # parsing command arguments
+  eval(parse(text = arg))
 }
 
-
-## check if a given integer is prime
 isPrime = function(n) {
-  if (n <= 3) {
+  # check if a given integer is prime
+  if ( n <= 3 ) {
     return (TRUE)
   }
   if (any((n %% 2:floor(sqrt(n))) == 0)) {
@@ -15,16 +14,23 @@ isPrime = function(n) {
   return (TRUE)
 }
 
-## estimate mean only using observation with prime indices
 estMeanPrimes = function (x) {
+  # estimate mean only using observation with prime indices
   n = length(x)
   ind = sapply(1:n, isPrime)
   return (mean(x[ind]))
 }
 
 MSE = function (seed,n,dist,rep){
-  classicalmean <-vector()
-  meanPrimes<-vector()
+  # Mean Squared Error Calculation for classical and prime mean.
+  #
+  # Args: 
+  #   seed=seed number.
+  #   n = sample size.
+  #   dist = distribution type.
+  #   rep = number of replicates.
+  classicalmean <- vector()
+  meanPrimes <- vector()
   set.seed(seed)
   for (i in 1:rep){
     if (dist == "gaussian"){
@@ -36,12 +42,12 @@ MSE = function (seed,n,dist,rep){
     else if (dist == "t5"){
       x = rt(n,5)
     }
-    classicalmean[i]<-mean(x)
-    meanPrimes[i]=estMeanPrimes(x)
+    classicalmean[i] <- mean(x)  # returns classical mean.
+    meanPrimes[i] <- estMeanPrimes(x) # returns prime mean.
   }
-  # return(classicalmean)
-  classicalMSE = sum((classicalmean)^2)/rep
-  primeMSE = sum((meanPrimes)^2)/rep
-  return(c(classicalMSE,primeMSE))
+  classicalMSE = sum((classicalmean)^2)/rep # returns classical MSE.
+  primeMSE = sum((meanPrimes)^2)/rep # returns prime MSE.
+  return(c(classicalMSE, primeMSE))
 }
-MSE(seed,n,dist,rep)
+MSE(seed, n, dist, rep)
+
