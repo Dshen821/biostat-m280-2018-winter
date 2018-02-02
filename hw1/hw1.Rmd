@@ -58,7 +58,7 @@ Use Linux shell commands to answer following questions.
 
     ```{bash}
     wc -l < /home/m280-data/hw1/merge-geno.fam
-    # Here we are using wc -l to count number of rows in .fam file;
+    # Here we are using wc -l to count number of rows in .fam file.
     ```
     There are 959 people in the merge-geno.fam data set.
     
@@ -66,7 +66,7 @@ Use Linux shell commands to answer following questions.
 
     ```{bash}
     wc -l < /home/m280-data/hw1/merge-geno.bim
-    # Here we are using wc -l to count number of rows in .bim file;
+    # Here we are using wc -l to count number of rows in .bim file.
     ```
     There are 8,348,674 SNPS in the merge-geno.bim data set.
     
@@ -75,7 +75,7 @@ Use Linux shell commands to answer following questions.
     ```{bash}
     awk -F" " '!_[$1]++' /home/m280-data/hw1/merge-geno.bim | awk '{print $1}'
     # Here we are using the awk -F command as a filter for non-redundant  \
-    # chromosomes in column 1;
+    # chromosomes in column 1.
     ```
     The chromosomes contained in this data set are: 3, 5, 7, 9, 11, 13, 15, 17, 19, 21
     
@@ -86,7 +86,7 @@ Use Linux shell commands to answer following questions.
     awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq -c 
     # Here we are using the awk command to print lines in column 1, but  \
     # results are piped into the uniq -c command to count the SNPS occurrences \
-    # in each chromosome
+    # in each chromosome.
     ```
 
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
@@ -95,7 +95,7 @@ Use Linux shell commands to answer following questions.
     awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769) print}'  \
     /home/m280-data/hw1/merge-geno.bim | wc -l
     # Here we use the awk command to filter for the chromsome specification  \
-    # and bp range;
+    # and bp range.
     ```
 
     There are a total of 894 SNPs located with the MAP4 gene.
