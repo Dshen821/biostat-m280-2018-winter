@@ -11,9 +11,9 @@ datfrmdat <- as.data.frame(matdat)  # dataframe creation.
 avgNames <- rep(c("Prime", "Class"), times = 5)  # vector of mean types altern.
 nObs <- rep(c(100, 200, 300, 400, 500), each = 2) # vector of sample sizes.
 labeled_datfrmdat <- cbind(nObs, avgNames, datfrmdat) 
-  # binding created vectors to dataframe of classical and prime means
+  # binding created vectors to dataframe of classical and prime means.
 colnames(labeled_datfrmdat) <- c("n", "Method", "t1", "t5", "Gaussian")
-  # label columns of the data frame
+  # label columns of the data frame.
 library(knitr)  #use kable function to create a table with appropriate labels.
 knitr::kable(labeled_datfrmdat,  
              col.names = c("$n$             ",  

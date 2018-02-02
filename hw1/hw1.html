@@ -392,18 +392,18 @@ with each field separated by a comma. Write a Linux shell command to convert <co
 </table>
 <pre class="r"><code>dat &lt;- lapply(Sys.glob(&quot;*_.txt&quot;), read.table)
 
-unl_dat &lt;- matrix(unlist(dat), byrow = TRUE, ncol = 3)[, -1]; 
-unl_dat2 &lt;- unl_dat[c(6:15, 1:5), c(2, 1)]; 
-unl_dat2_trans &lt;- c(t(unl_dat2)) #transpose
+unl_dat &lt;- matrix(unlist(dat), byrow = TRUE, ncol = 3)[, -1] 
+unl_dat2 &lt;- unl_dat[c(6:15, 1:5), c(2, 1)]  
+unl_dat2_trans &lt;- c(t(unl_dat2)) 
 matdat &lt;- matrix(unl_dat2_trans, nrow = 10)
+datfrmdat &lt;- as.data.frame(matdat) 
 
-datfrmdat &lt;- as.data.frame(matdat)
-avgNames &lt;- rep(c(&quot;PrimeAvg&quot;, &quot;ClassAvg&quot;), times = 5)
-nObs &lt;- rep(c(100, 200, 300, 400, 500), each = 2)
-labeled_datfrmdat &lt;- cbind(nObs, avgNames, datfrmdat)
+avgNames &lt;- rep(c(&quot;Prime&quot;, &quot;Class&quot;), times = 5)  
+nObs &lt;- rep(c(100, 200, 300, 400, 500), each = 2) 
+labeled_datfrmdat &lt;- cbind(nObs, avgNames, datfrmdat) 
 colnames(labeled_datfrmdat) &lt;- c(&quot;n&quot;, &quot;Method&quot;, &quot;t1&quot;, &quot;t5&quot;, &quot;Gaussian&quot;)
 
-library(knitr)
+library(knitr) 
 knitr::kable(labeled_datfrmdat,  
              col.names = c(&quot;$n$             &quot;,  
                            &quot;            Method&quot;, &quot;$t_1$&quot;, &quot;$t_5$&quot;,&quot;Gaussian&quot;))</code></pre>
@@ -420,70 +420,70 @@ knitr::kable(labeled_datfrmdat,
 <tbody>
 <tr class="odd">
 <td align="center">100</td>
-<td align="center">PrimeAvg</td>
+<td align="center">Prime</td>
 <td align="right">2808.42570</td>
 <td align="right">0.0664284</td>
 <td align="right">0.0414674</td>
 </tr>
 <tr class="even">
 <td align="center">100</td>
-<td align="center">ClassAvg</td>
+<td align="center">Class</td>
 <td align="right">230.23720</td>
 <td align="right">0.0167508</td>
 <td align="right">0.0094834</td>
 </tr>
 <tr class="odd">
 <td align="center">200</td>
-<td align="center">PrimeAvg</td>
+<td align="center">Prime</td>
 <td align="right">799.31393</td>
 <td align="right">0.0418479</td>
 <td align="right">0.0187544</td>
 </tr>
 <tr class="even">
 <td align="center">200</td>
-<td align="center">ClassAvg</td>
+<td align="center">Class</td>
 <td align="right">95.87976</td>
 <td align="right">0.0076665</td>
 <td align="right">0.0071637</td>
 </tr>
 <tr class="odd">
 <td align="center">300</td>
-<td align="center">PrimeAvg</td>
+<td align="center">Prime</td>
 <td align="right">446.40235</td>
 <td align="right">0.0241224</td>
 <td align="right">0.0200254</td>
 </tr>
 <tr class="even">
 <td align="center">300</td>
-<td align="center">ClassAvg</td>
+<td align="center">Class</td>
 <td align="right">53.57742</td>
 <td align="right">0.0054711</td>
 <td align="right">0.0035344</td>
 </tr>
 <tr class="odd">
 <td align="center">400</td>
-<td align="center">PrimeAvg</td>
+<td align="center">Prime</td>
 <td align="right">19.45133</td>
 <td align="right">0.0243314</td>
 <td align="right">0.0112689</td>
 </tr>
 <tr class="even">
 <td align="center">400</td>
-<td align="center">ClassAvg</td>
+<td align="center">Class</td>
 <td align="right">20.53370</td>
 <td align="right">0.0035170</td>
 <td align="right">0.0029707</td>
 </tr>
 <tr class="odd">
 <td align="center">500</td>
-<td align="center">PrimeAvg</td>
+<td align="center">Prime</td>
 <td align="right">217.26890</td>
 <td align="right">0.0116763</td>
 <td align="right">0.0111769</td>
 </tr>
 <tr class="even">
 <td align="center">500</td>
-<td align="center">ClassAvg</td>
+<td align="center">Class</td>
 <td align="right">20.78780</td>
 <td align="right">0.0033550</td>
 <td align="right">0.0025920</td>
