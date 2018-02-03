@@ -77,7 +77,7 @@ Use Linux shell commands to answer following questions.
     # Here we are using the awk -F command as a filter for non-redundant  \
     # chromosomes in column 1.
     ```
-    The chromosomes contained in this data set are: 3, 5, 7, 9, 11, 13, 15, 17, 19, 21
+    The chromosomes contained in this data set are: 3, 5, 7, 9, 11, 13, 15, 17, 19, 21.
     
     How many SNPs are in each chromosome?
 
@@ -149,41 +149,14 @@ for both methods.
     will be stored seperately into an appropriately named text file (distribution_n_size_.txt).
     
     ```{bash, echo=FALSE, eval=TRUE} 
-       Rscript autoSim.R
+        Rscript autoSim.R
     ```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 
-| $n$ | Method   | $t_1$ | $t_5$ | Gaussian |
-|-----|----------|-------|-------|----------|
-| 100 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 200 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 300 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 400 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 500 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-
-```{r, results = 'asis'}
-dat <- lapply(Sys.glob("*_.txt"), read.table)
-
-unl_dat <- matrix(unlist(dat), byrow = TRUE, ncol = 3)[, -1] 
-unl_dat2 <- unl_dat[c(6:15, 1:5), c(2, 1)]  
-unl_dat2_trans <- c(t(unl_dat2)) 
-matdat <- matrix(unl_dat2_trans, nrow = 10)
-datfrmdat <- as.data.frame(matdat) 
-
-avgNames <- rep(c("Prime", "Class"), times = 5)  
-nObs <- rep(c(100, 200, 300, 400, 500), each = 2) 
-labeled_datfrmdat <- cbind(nObs, avgNames, datfrmdat) 
-colnames(labeled_datfrmdat) <- c("n", "Method", "t1", "t5", "Gaussian")
-
-library(knitr) 
-knitr::kable(labeled_datfrmdat,  
-             col.names = c("$n$             ",  
-                           "            Method", "$t_1$", "$t_5$","Gaussian"))
-```
+    The R script was written in tableCons.R and will be called in the following line with bash code.
+ 
+    ```{bash, results = 'asis'}
+        Rscript tableCons.R
+    ```
 
