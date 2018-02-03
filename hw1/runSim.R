@@ -3,7 +3,7 @@ for (arg in commandArgs(TRUE)) {
   eval(parse(text = arg))
 }
   # Check if a given integer is prime
-isPrime = function(n) {
+isPrime <- function(n) {
   if ( n <= 3 ) {
     return (TRUE)
   }
@@ -13,13 +13,13 @@ isPrime = function(n) {
   return (TRUE)
 }
   # Estimate mean only using observation with prime indices.
-estMeanPrimes = function (x) {
-  n = length(x)
-  ind = sapply(1:n, isPrime)
+estMeanPrimes <- function (x) {
+  n <- length(x)
+  ind <- sapply(1:n, isPrime)
   return (mean(x[ind]))
 }
   # Mean Squared Error Calculation for classical and prime mean.
-MSE = function (seed, n, dist, rep){
+MSE <- function (seed, n, dist, rep){
   # Args: 
   #   seed=seed number.
   #   n = sample size.
@@ -39,9 +39,9 @@ MSE = function (seed, n, dist, rep){
     classicalmean[i] <- mean(x)  # returns classical mean.
     meanPrimes[i] <- estMeanPrimes(x)  # returns prime mean.
   }
-  classicalMSE = sum((classicalmean)^2)/rep # returns classical MSE.
-  primeMSE = sum((meanPrimes)^2)/rep  # returns prime MSE.
-  return(c(classicalMSE, primeMSE))
+  classicalMSE <- sum((classicalmean)^2)/rep # returns classical MSE.
+  primeMSE <- sum((meanPrimes)^2)/rep  # returns prime MSE.
+  return (c(classicalMSE, primeMSE))
 }
 MSE(seed, n, dist, rep)
 
