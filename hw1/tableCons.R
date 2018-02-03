@@ -16,5 +16,5 @@ colnames(labeledDatFrmDat) <- c("n", "Method", "t1", "t5", "Gaussian")
 
 library(knitr)  # use kable function to create a table with appropriate labels.
 knitr::kable(labeledDatFrmDat,  
-             col.names = c("$n$",  
-                           "Method", "$t_1$", "$t_5$","Gaussian"), align = "l")
+             col.names = c("$n$", "Method", "$t_1$", "$t_5$", "Gaussian"),  
+                           align = "l")
