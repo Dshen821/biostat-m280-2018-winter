@@ -71,7 +71,7 @@
 
     Yes.
 
-### Julia code style: 18/20
+### R code style: 18/20
 
 -   [Rule 3.](https://google.github.io/styleguide/Rguide.xml#linelength) The maximum line length is 80 characters.
 
