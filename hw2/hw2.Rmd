@@ -1,0 +1,66 @@
+---
+title: "hw2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+## 7.3.4 Exercises:
+1. Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
+
+    ```{r}
+    library(ggplot2)
+    ggplot(data = diamonds, mapping = aes(x = x)) +
+      geom_freqpoly(binwidth = 0.01) +
+      coord_cartesian(xlim = c(0,20)) -> p1
+
+    ggplot(data = diamonds, mapping = aes(x = y)) +
+      geom_freqpoly(binwidth = 0.01) +
+      coord_cartesian(xlim = c(0,20)) -> p2
+
+    ggplot(data = diamonds, mapping = aes(x = z)) +
+      geom_freqpoly(binwidth = 0.01) +
+      coord_cartesian(xlim = c(0,20)) -> p3
+
+    source("http://peterhaschke.com/Code/multiplot.R")
+    multiplot(p1, p2, p3, cols=1)
+    ```
+The plot for z shows measurements significantly shorter than those found in x and y, while x and y both look to be distributed very similarly. y and z both appear to have outliers. It makes sense to conclude that z is depth, while x is length, y is width (but x and y could be vice versa, as it is hard to distinguish between the two).
+
+2. Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
+
+
+    ```{r}
+    library(dplyr)
+
+      # entire plot shows an unusual bump around ~8000.
+    ggplot(data = diamonds, mapping = aes(x = price)) +
+      geom_freqpoly(binwidth = 1) -> p1
+    
+      # zoom in on lower section and discover no price at ~1500.
+    lower <- diamonds %>% 
+      filter(price < 2000)
+    ggplot(data = lower, mapping = aes(x = price)) +
+      geom_histogram(binwidth = 10) -> p2
+    
+      # zoom in on mid-section.
+    bigger <- diamonds %>%
+      filter(price <10000 & price > 6000)
+    ggplot(data = bigger, mapping = aes(x = price)) +
+      geom_histogram(binwidth = 50) -> p3
+    
+      # zoom in on upper section.
+    upper <- diamonds %>% 
+      filter(price >5000)
+    ggplot(data = upper, mapping = aes(x = price)) +
+      geom_histogram(binwidth = 10) -> p4
+
+    multiplot(p1, p2, p3, p4, cols=2)
+```
+
+We notice generally that there are exponentially more lower priced diamonds than expensive diamonds. The top left graph shows a slight increase in diamonds priced around ~8000. The lower left graph shows an unusual absence of diamonds priced at ~1500.
+
+
