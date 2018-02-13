@@ -75,3 +75,33 @@ We notice generally that there are exponentially more lower priced diamonds than
 There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat diamonds. That is roughly 68 times more 1.00 carat diamonds than 0.99 carat diamonds. There is likely a big price descrepancy in diamond pricing once they hit the 1.00 carat threshold. Thus, those at 0.99 carat may simply be rounded up to 1.00 for marketability.
 
 4. Compare and contrast coord_cartesian() vs xlim() or ylim() when zooming in on a histogram. What happens if you leave binwidth unset? What happens if you try and zoom so only half a bar shows?
+
+    ```{r}
+      # xlim() or ylim().
+    ggplot(diamonds) +
+      geom_histogram(mapping = aes(x = price)) +
+      xlim(1000, 6000) +
+      ylim(0, 3500) -> p1
+      # coord_cartesian()
+    ggplot(diamonds) +
+      geom_histogram(mapping = aes(x = price)) +
+      coord_cartesian(xlim = c(1000, 6000), ylim = c(0, 3500)) -> p2
+    
+    multiplot(p2, p1, cols = 1)
+    
+      # zooming in so only half a bar shows.
+      # xlim() or ylim().
+    ggplot(diamonds) +
+      geom_histogram(mapping = aes(x = price)) +
+      xlim(5999.5, 6000) +
+      ylim(0, 3500) -> p1
+      # coord_cartesian()
+    ggplot(diamonds) +
+      geom_histogram(mapping = aes(x = price)) +
+      coord_cartesian(xlim = c(5999.5, 6000), ylim = c(0, 3500)) -> p2    
+    multiplot(p2, p1, cols = 1)
+    ```
+
+Using xlim and ylim functions alone, drops values outside of the xlim, ylim range, before calculating the histogram. This is why the xlim, ylim plot has a lower count than the coord_cartesian plot. Whereas, cartesian_coord does not drop any values, and only "zooms" into the limits defined by xlim and ylim.
+
+This, if you try to zoom into half of a bar using coord_cartesian, you will see a solid block along the x-values, at the appropriate count. Whereas, using the xlim() and ylim() functions alone, you will see an empty plot because values outside of the specific price range (in this case 5999.5-6000) will be dropped before calculating and drawing the histogram.
