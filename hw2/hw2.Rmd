@@ -63,4 +63,15 @@ The plot for z shows measurements significantly shorter than those found in x an
 
 We notice generally that there are exponentially more lower priced diamonds than expensive diamonds. The top left graph shows a slight increase in diamonds priced around ~8000. The lower left graph shows an unusual absence of diamonds priced at ~1500.
 
+3. How many diamonds are 0.99 carat? How many are 1 carat? What do you think is the cause of the difference?
 
+    ```{r}
+    unusual <- diamonds %>% 
+      filter(carat == 1 | carat == 0.99) %>% 
+      count(carat)
+    unusual
+    ```
+
+There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat diamonds. That is roughly 68 times more 1.00 carat diamonds than 0.99 carat diamonds. There is likely a big price descrepancy in diamond pricing once they hit the 1.00 carat threshold. Thus, those at 0.99 carat may simply be rounded up to 1.00 for marketability.
+
+4. Compare and contrast coord_cartesian() vs xlim() or ylim() when zooming in on a histogram. What happens if you leave binwidth unset? What happens if you try and zoom so only half a bar shows?
