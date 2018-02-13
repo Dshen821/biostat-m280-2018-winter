@@ -105,3 +105,25 @@ There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat 
 Using xlim and ylim functions alone, drops values outside of the xlim, ylim range, before calculating the histogram. This is why the xlim, ylim plot has a lower count than the coord_cartesian plot. Whereas, cartesian_coord does not drop any values, and only "zooms" into the limits defined by xlim and ylim.
 
 This, if you try to zoom into half of a bar using coord_cartesian, you will see a solid block along the x-values, at the appropriate count. Whereas, using the xlim() and ylim() functions alone, you will see an empty plot because values outside of the specific price range (in this case 5999.5-6000) will be dropped before calculating and drawing the histogram.
+
+## 7.4.1:
+
+What happens to missing values in a histogram? What happens to missing values in a bar chart? Why is there a difference?
+
+```{r}
+  # Creating a subset from diamonds, removing lower and upper length.
+diamondMidLength <- diamonds %>%
+  mutate(x = ifelse(x < 3 | x > 20, NA, x))
+ggplot(diamondMidLength) +
+  geom_histogram(mapping = aes(x = x)) -> p1
+
+  # Creating a subset from
+n<-nrow(diamonds)
+diamondMidClarity <- diamonds %>%
+  mutate( clarity = if_else(rnorm(n) < 0.0001, NA_character_, as.character(cut))) 
+ggplot(diamondMidClarity) +
+  geom_bar(mapping = aes(x = clarity)) -> p2
+
+multiplot(p1, p2, cols = 1)
+```
+When attempting to plot a subset of data diamondMidLength with missing values (NA), the missing values are first removed, before the number of observations in each bin is calculated. There will be a warning message that alerts you "Removed 8 rows containing non-finite values (stat_bin)". When using geom_bar to plot a subset of categorical data DiamondMidClarity, the "NA" values are treated as another gradation of clarity and are subsequently plotted as another category in the bar plot.
