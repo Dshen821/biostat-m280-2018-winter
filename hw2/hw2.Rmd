@@ -166,6 +166,33 @@ Here we use a boxplot to visualize the departure time distribution for canceled 
 
 
 2) What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
+    ```{r}
+  #lvplot shows that carat is significant for predicting price of diamond.
+# install.packages("lvplot")
+library(lvplot)
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_lv()
+
+
+# appears to be a slight negative correlation between cut and carat. As cut improves, carat decreases.
+# fair diamonds have greater carat
+ggplot(data = diamonds) +
+  geom_boxplot(aes(cut, carat))
+
+ggplot(diamonds, aes(carat, colour = cut)) +
+  geom_density(position = "dodge")
+
+ggplot(data = diamonds) +
+  geom_count(mapping = aes(x = cut, y = carat))
+
+diamonds %>%
+  group_by(cut) %>%
+  summarise(cor(carat, price))
+
+# Carat and price are highly correlated between and within diamond quality.
+# Carat is most important for predicting the price of diamond and Carat is negatively correlated with cut
+# Consequently as quality of cut increases, price of diamond decreases. (Thus, lower quality cuts, on average, are higher in price)
+    ```
 
 
 3) Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
@@ -236,5 +263,6 @@ Geom_freqpoly allows for easy determination of the highest density of price poin
     ```
 Geom_jitter allows us to see the relationship between a continuous and categorical variable by adding a small amount of random variation to each point-- handles the overplotting problem created by the discreteness in smaller datasets. Geom_beeswarm is closest in shape (most compact) to geom_violin, with points offset from each other. Geom_quasirandom plots are created with points spaced further away, randomly via different methods including: tukey, tukeyDense, smiley, frowney. In appearance, geom_quasirandom is a jitter/beeswarm hybrid in terms of spacing.
 
-
+## 7.5.2.1:
+How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?
 

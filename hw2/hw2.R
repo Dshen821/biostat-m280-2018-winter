@@ -169,10 +169,32 @@ flightSub <- nycflights13::flights %>%
   ggplot() + geom_boxplot(mapping = aes(y = departureTime, x = canceledFlight))
 
 
-#What variable in the diamonds dataset is most important for predicting the price of a diamond?
+# 2) What variable in the diamonds dataset is most important for predicting the price of a diamond?
 #How is that variable correlated with cut? Why does the combination of those
 #two relationships lead to lower quality diamonds being more expensive?
 
+  #lvplot shows that carat is significant for predicting price of diamond.
+# install.packages("lvplot")
+library(lvplot)
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_lv()
+
+
+# appears to be a slight negative correlation between cut and carat. As cut improves, carat decreases.
+# fair diamonds have greater carat
+ggplot(data = diamonds) +
+  geom_boxplot(aes(cut, carat))
+
+ggplot(diamonds, aes(carat, colour = cut)) +
+  geom_density(position = "dodge")
+
+diamonds %>%
+  group_by(cut) %>%
+  summarise(cor(carat, price))
+
+# Carat and price are highly correlated between and within diamond quality.
+# Carat is most important for predicting the price of diamond and Carat is negatively correlated with cut
+# Consequently as quality of cut increases, price of diamond decreases. (Thus, lower quality cuts, on average, are higher in price)
 
 # Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
 library(ggstance)
@@ -226,6 +248,9 @@ ggplot(data = mpg) +
   geom_beeswarm(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) -> p3
 
 multiplot(p1, p2, p3, col = 1)
+
+
+## 7.5.2.1
 
 
 
