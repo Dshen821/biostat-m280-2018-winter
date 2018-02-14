@@ -193,4 +193,39 @@ multiplot(p1, p2, numcol = 1)
 
   # install.packages("lvplot")
 library(lvplot)
+ggplot(diamonds, aes(x = cut, y = price)) +
+  geom_lv()
+
+# Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
+
+ggplot(data = diamonds, mapping = aes(x = price, colour = cut)) +
+  geom_freqpoly(binwidth = 500)
+
+ggplot(data = diamonds, mapping = aes(x = price, colour = cut)) +
+  geom_histogram(binwidth = 50) +
+  facet_wrap(~cut, ncol = 1, scales = "free_y")
+
+ggplot(data = diamonds, mapping = aes(x = cut, y = price)) +
+  geom_violin(aes(fill = cut)) +
+  coord_flip()
+
+# If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm 
+# package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.
+
+  # install.packages("ggbeeswarm")
+library("ggbeeswarm")
+
+
+ggplot(data = mpg) +
+  geom_jitter(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) -> p1
+
+ggplot(data = mpg) +
+  geom_quasirandom(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) -> p2
+
+ggplot(data = mpg) +
+  geom_beeswarm(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) -> p3
+
+multiplot(p1, p2, p3, col = 1)
+
+
 
