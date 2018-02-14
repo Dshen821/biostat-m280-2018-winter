@@ -3,6 +3,8 @@ title: "hw2"
 output: html_document
 ---
 
+sessionInfo()
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = TRUE)
@@ -88,7 +90,10 @@ There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat 
       coord_cartesian(xlim = c(1000, 6000), ylim = c(0, 3500)) -> p2
     
     multiplot(p2, p1, cols = 1)
-    
+    ```
+
+Using xlim and ylim functions alone, drops values outside of the xlim, ylim range, before calculating the histogram. This is why the xlim, ylim plot has a lower count than the coord_cartesian plot. Whereas, cartesian_coord does not drop any values, and only "zooms" into the limits defined by xlim and ylim.
+    ```{r}
       # zooming in so only half a bar shows.
       # xlim() or ylim().
     ggplot(diamonds) +
@@ -102,9 +107,7 @@ There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat 
     multiplot(p2, p1, cols = 1)
     ```
 
-Using xlim and ylim functions alone, drops values outside of the xlim, ylim range, before calculating the histogram. This is why the xlim, ylim plot has a lower count than the coord_cartesian plot. Whereas, cartesian_coord does not drop any values, and only "zooms" into the limits defined by xlim and ylim.
-
-This, if you try to zoom into half of a bar using coord_cartesian, you will see a solid block along the x-values, at the appropriate count. Whereas, using the xlim() and ylim() functions alone, you will see an empty plot because values outside of the specific price range (in this case 5999.5-6000) will be dropped before calculating and drawing the histogram.
+This example shows that if you try to zoom into half of a bar using coord_cartesian, you will see a solid block along the x-values, at the appropriate count. Whereas, using the xlim() and ylim() functions alone, you will see an empty plot because values outside of the specific price range (in this case 5999.5-6000) will be dropped before calculating and drawing the histogram.
 
 ## 7.4.1:
 
@@ -127,3 +130,63 @@ ggplot(diamondMidClarity) +
 multiplot(p1, p2, cols = 1)
 ```
 When attempting to plot a subset of data diamondMidLength with missing values (NA), the missing values are first removed, before the number of observations in each bin is calculated. There will be a warning message that alerts you "Removed 8 rows containing non-finite values (stat_bin)". When using geom_bar to plot a subset of categorical data DiamondMidClarity, the "NA" values are treated as another gradation of clarity and are subsequently plotted as another category in the bar plot.
+
+
+```{r}
+ranVals <- rnorm(n = 100, mean = 10, sd = 10)
+  # In this case, which elements of (ranVals %in% sample) are TRUE:
+  # Randomly chooses 20 indices to be replaced with NA
+miss <- which(ranVals %in% sample(ranVals,20))
+ranVals[miss] <- NA
+
+mean(ranVals, na.rm = FALSE)
+sum(ranVals, na.rm = FALSE)
+
+mean(ranVals, na.rm = TRUE)
+sum(ranVals, na.rm = TRUE)
+```
+When attempting to calculate the mean or sum of a vector with NA values, the result is NA. If we utilize na.rm = TRUE, the NA observations are ommitted from the calculation, allowing us to have a numerical answer.
+
+## 7.5.1.1:
+
+Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.
+    ```{r}
+    flightSub <- nycflights13::flights %>%
+      # If the departure time is na = canceled flight.
+    mutate(canceledFlight = is.na(dep_time),
+             # Calculating time on a 24 hour scale.
+           min = (sched_dep_time %% 100) / 60,
+           hour = sched_dep_time %/% 100,
+           departureTime = hour + min
+          ) %>%
+    ggplot() + geom_boxplot(mapping = aes(y = departureTime, x = canceledFlight))
+    flightSub
+    ```
+Here we use a boxplot to visualize the departure time distribution for canceled and non-canceled fights. The median departure time and IQR of canceled flights are later in the day than those of flights that were not canceled. We also see an outlier point at approximately 1 AM for a canceled flight.
+
+
+2) What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
+
+
+3) Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
+
+    ```{r}
+    ## install.packages("ggstance")
+    library(ggstance)
+    ggplot(data = mpg) +
+      geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)
+                   ) -> p1
+      # Usage of coord_flip() function to show vehicle classes on the y axis.
+    ggplot(data = mpg) +
+      geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)
+                   ) + coord_flip() -> p2
+      # Usage of ggstance, requires switching the assignment of x and y variables. 
+    ggplot(data = mpg) +
+      geom_boxploth(mapping = aes(x = hwy,
+                    y = reorder(class, hwy, FUN = median))) -> p3
+    
+    multiplot(p1, p2, p3, numcol = 1)
+    ```
+Originally we have the boxplot defined with the classes of vehicles on the x axis, and hwy on the y axis. Thus when we implement coord_flip, the result is vehicles on the y axis and hwy on the x axis. By installing ggstance and using the function geom_boxploth, to directly plot a horizontal boxplot, we define hwy on the x axis and vehicle classes on the y.
+
+4) One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
