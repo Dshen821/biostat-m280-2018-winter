@@ -35,6 +35,7 @@ ggplot(diamonds) +
   geom_histogram(mapping = aes(x = y), binwidth = 0.5) +
   coord_cartesian(ylim = c(0, 50))
 
+
 unusual <- diamonds %>% 
   filter(y < 3 | y > 20) %>% 
   select(price, x, y, z) %>%
@@ -126,20 +127,19 @@ multiplot(p2, p1, cols = 1)
   # 7.4.1
   # Creating a subset from diamonds, removing lower and upper length.
 diamondMidLength <- diamonds %>%
-  mutate(x = ifelse(x < 3 | x > 20, NA, x)) %>%
+  mutate(x = ifelse(x < 3 | x > 20, NA, x))
 ggplot(diamondMidLength) +
   geom_histogram(mapping = aes(x = x))
 
   # Creating a subset from
 n<-nrow(diamonds)
 diamondMidClarity <- diamonds %>%
-  mutate( clarity = if_else(rnorm(n) < 0.0001, NA_character_, as.character(cut))) 
+  mutate( clarity = if_else(rnorm(n) < 1, NA_character_, as.character(cut))) 
 ggplot(diamondMidClarity) +
   geom_bar(mapping = aes(x = clarity))
 
 
   # What does na.rm = TRUE do in mean() and sum()?
-
   # In this case, we are asking which elements of (ranVals %in% sample) are TRUE:
 ranVals <- rnorm(n = 100, mean = 10, sd = 10)
   # Randomly chooses 20 indices to be replaced with NA
@@ -151,3 +151,46 @@ sum(ranVals, na.rm = FALSE)
 
 mean(ranVals, na.rm = TRUE)
 sum(ranVals, na.rm = TRUE)
+
+# Use what you’ve learned to improve the visualisation of the departure times of
+# cancelled vs. non-cancelled flights.
+library(nycflights13)
+
+
+
+  # If the departure time is na = canceled flight;
+
+flightSub <- nycflights13::flights %>%
+  mutate( canceledFlight = is.na(dep_time),
+          min = (sched_dep_time %% 100) / 60,
+          hour = sched_dep_time %/% 100,
+          departureTime = hour + min
+        ) %>%
+  ggplot() + geom_boxplot(mapping = aes(y = departureTime, x = canceledFlight))
+
+
+#What variable in the diamonds dataset is most important for predicting the price of a diamond?
+#How is that variable correlated with cut? Why does the combination of those
+#two relationships lead to lower quality diamonds being more expensive?
+
+
+# Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
+library(ggstance)
+
+ggplot(data = mpg) +
+  geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) +
+  coord_flip() -> p1
+
+ggplot(data = mpg) +
+  geom_boxploth(mapping = aes(x = hwy,
+                              y = reorder(class, hwy, FUN = median))
+                              ) -> p2
+multiplot(p1, p2, numcol = 1)
+
+# One problem with boxplots is that they were developed in an era of much smaller datasets and tend to 
+# display a prohibitively large number of “outlying values”. One approach to remedy this problem is the 
+# letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
+
+  # install.packages("lvplot")
+library(lvplot)
+
