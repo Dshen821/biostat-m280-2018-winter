@@ -274,5 +274,132 @@ Geom_freqpoly allows for easy determination of the highest density of price poin
 Geom_jitter allows us to see the relationship between a continuous and categorical variable by adding a small amount of random variation to each point-- handles the overplotting problem created by the discreteness in smaller datasets. Geom_beeswarm is closest in shape (most compact) to geom_violin, with points offset from each other. Geom_quasirandom plots are created with points spaced further away, randomly via different methods including: tukey, tukeyDense, smiley, frowney. In appearance, geom_quasirandom is a jitter/beeswarm hybrid in terms of spacing.
 
 ## 7.5.2.1:
-How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?
+1) How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?
+
+    ```{r}
+      # Cut within Colour.
+    diamonds %>% 
+      count(color, cut) %>%
+      group_by(color) %>%
+      mutate(percentage = n / sum(n)) %>%
+      ggplot(mapping = aes(x = color, y = cut, fill = percentage)) +
+      geom_tile() -> p1
+      # Colour within Cut.
+    diamonds %>% 
+      count(color, cut) %>%
+      group_by(cut) %>%
+      mutate(percentage = n / sum(n)) %>%
+      ggplot(mapping = aes(x = color, y = cut, fill = percentage)) +
+      geom_tile() -> p2
+
+    multiplot(p1, p2, ncol = 2)
+    ```
+To better illustrate the distribitions of cut within colour and colour within cut, instead  of using counts in the plot, we can calculate the proportion that fall into each color and cut type and plot by proportion to more clearly illustrate distribution of each.
+
+2)Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?
+
+    ```{r}
+    flights %>%
+      group_by(dest, month) %>%
+      summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+      ggplot(aes(x = factor(month), y = dest, fill = dep_delay)) +
+      geom_tile() +
+      labs( x = "Month of Departure", y = "Destination", fill = "Delay Time")
+    ```
+It is very difficult to interpret this plot because difference between delay times, and the original color scheme. Destinations need to be sorted by number of flights.  Further, there are many missing values for various destinations, between months, which makes comparisons difficult.
+    ```{r}
+  # Here we are ensuring plotted points have a delay in departure AND flights in all 12 months. 
+flights %>%
+  filter(dep_delay > 0) %>%
+  group_by(dest, month) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  filter (n() == 12) %>%
+  ungroup() %>%
+  ggplot(aes(x = factor(month), y = dest, fill = dep_delay)) +
+  geom_tile()
+    ```
+3) Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?
+    ```{r}
+      # x = color, y = cut.
+    diamonds %>% 
+      count(color, cut) %>%  
+      ggplot(mapping = aes(x = color, y = cut)) +
+      geom_tile(mapping = aes(fill = n)) -> p1
+      # y = color, x = cut.
+    diamonds %>% 
+      count(color, cut) %>%  
+      ggplot(mapping = aes(x = cut, y = color)) +
+      geom_tile(mapping = aes(fill = n)) -> p2
+
+    multiplot (p1, p2, ncol = 2)
+    ```
+Intuitively, its easier for the audience to interpret the lengthier variable on the y-axis. Further, Cut is an ordered categorical variable, which maybe visually misleading if plotted on the x-axis. Longer labels, usually run a lower risk of overlap on the y-axis, comapred to the x-axis, as well. When plotting cut on the y-axis, the lighter colors (higher n counts) are towards the top of the plot, which is easier to interpret and is more intuitive.
+
+## 7.5.3.1 Exercises
+1) Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?
+    ```{r}
+      # cut_width to plot count.
+    ggplot(data = diamonds,
+           mapping = aes(x = price,
+                         colour = cut_width(carat, 0.5))) +
+           geom_freqpoly() -> p1
+      # cut_width to plot density.
+    ggplot(data = diamonds,
+           mapping = aes(x = price,
+                         y = ..density..,
+                         colour = cut_width(carat, 0.5))) +
+           geom_freqpoly() -> p2
+      # cut_number to plot count.
+    ggplot(data = diamonds,
+           mapping = aes(x = price,
+                         colour = cut_number(carat, 10))) +
+           geom_freqpoly() -> p3
+      # cut_number to plot density.
+    ggplot(data = diamonds,
+           mapping = aes(x = price,
+                         y = ..density..,
+                         colour = cut_number(carat, 10))) +
+           geom_freqpoly() -> p4
+
+    multiplot(p1, p2, p3, p4, ncol = 2)
+    ```
+
+Cut_width divides the variable carat into bins of a set width (0.5 in this case). Cut_number attempts to display the same number of points in each bin (in this case 10). The downside of using cut_width is that the distribution of points in each bin can be unequal-- particularly if the data is skewed, more points will fall in the bins on the side that the data is skewed towards. When using cut_width, plotting  density instead of counts can combat this problem, however, bins with few counts will still be difficult to interpret. When using Cut_number, the plots of density and count will look the same in distribution because the same number of points will fall in each bin.
+
+2) Visualise the distribution of carat, partitioned by price.
+    ```{r}
+      # Paritioning price into 15 bins.
+    ggplot(diamonds, aes(x = cut_number(price, 15), y = carat)) +
+      geom_boxplot() +
+      xlab("Price (dollars)") +
+      coord_flip()
+    ```
+Here we parition the distribution of price into 15 bins with the same number of observations. We can clearly see a general increase of price as carat increases.
+
+3) How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?
+
+The price distribution of very large carat diamonds generally increases positively. However, the variance in distribution for larger carat diamonds also increases. This can be suprising at first glance, as you would expect large diamonds to definitely increase in price, always. However, factors like cut and clarity-- which can affect price more strongly-- may tend to decrease with increasing carat of diamond. (It is rare to find a large carat diamond that is a high quality cut and high clarity).
+
+4) Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.
+
+5) Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.
+    ```{r}
+      # Two-Dimensional plot of length vs width.
+    ggplot(data = diamonds) +
+      geom_point(mapping = aes(x = x, y = y)) +
+      coord_cartesian(xlim = c(4, 11), ylim = c(4, 11))
+      # One-Dimensional plot of length
+    ggplot(data = diamonds, 
+           mapping = aes(x = price,
+                         y = ..density..,
+                         colour = cut_number(carat, 10))) +
+      geom_freqpoly()
+      # One-Dimensional plot of width  
+    ggplot(data = diamonds, 
+           mapping = aes(x = price,
+                         y = ..density..,
+                         colour = cut_number(x, 10))) +
+    geom_freqpoly()
+    ```
+Length (x) and Width (y) of diamond are strongly positively correlated. Thus, the 2D plot very easily highlights outliers that do not follow the linear relationship. Whereas the 1D plots of length alone, or width alone, may hide these outliers, as either length or width of a diamond alone may follow their respective distributions, but may deviate in length in either width or length. For example, a very long, but narrow diamond, or a very short, but wide diamond may not be an outlier in terms of price, but would be in relation to each other.
 

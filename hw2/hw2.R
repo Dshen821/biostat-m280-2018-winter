@@ -251,6 +251,84 @@ multiplot(p1, p2, p3, col = 1)
 
 
 ## 7.5.2.1
+#How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?
 
+  # Cut within Colour.
+diamonds %>% 
+  count(color, cut) %>%
+  group_by(color) %>%
+  mutate(percentage = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut, fill = percentage)) +
+  geom_tile() -> p1
+  # Colour within Cut.
+diamonds %>% 
+  count(color, cut) %>%
+  group_by(cut) %>%
+  mutate(percentage = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut, fill = percentage)) +
+  geom_tile() -> p2
 
+multiplot(p1, p2, ncol = 2)
 
+# Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year.
+# What makes the plot difficult to read? How could you improve it?
+
+library(viridis)
+
+flights %>%
+  group_by(dest, month) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(aes(x = factor(month), y = dest, fill = dep_delay)) +
+  geom_tile() +
+  labs( x = "Month of Departure", y = "Destination", fill = "Delay Time")
+
+  # Here we are ensuring plotted points have a delay in departure AND flights in all 12 months. 
+flights %>%
+  filter(dep_delay > 0) %>%
+  group_by(dest, month) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  filter (n() == 12) %>%
+  ungroup() %>%
+  ggplot(aes(x = factor(month), y = dest, fill = dep_delay)) +
+  geom_tile()
+
+  # 3) Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?
+
+diamonds %>% 
+  count(color, cut) %>%  
+  ggplot(mapping = aes(x = color, y = cut)) +
+  geom_tile(mapping = aes(fill = n)) -> p1
+
+diamonds %>% 
+  count(color, cut) %>%  
+  ggplot(mapping = aes(x = cut, y = color)) +
+  geom_tile(mapping = aes(fill = n)) -> p2
+
+multiplot (p1, p2, ncol = 2)
+
+# 1) Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need
+#to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?
+
+ggplot(data = diamonds,
+       mapping = aes(x = price,
+                     colour = cut_width(carat, 0.5))) +
+  geom_freqpoly() -> p1
+
+ggplot(data = diamonds,
+       mapping = aes(x = price,
+                     y = ..density..,
+                     colour = cut_width(carat, 0.5))) +
+  geom_freqpoly() -> p2
+
+ggplot(data = diamonds,
+       mapping = aes(x = price,
+                     colour = cut_number(carat, 10))) +
+  geom_freqpoly() -> p3
+
+ggplot(data = diamonds,
+       mapping = aes(x = price,
+                     y = ..density..,
+                     colour = cut_number(carat, 10))) +
+  geom_freqpoly() -> p4
+
+multiplot(p1, p2, p3, p4, ncol = 2)
