@@ -176,6 +176,16 @@ ggplot(diamonds, aes(x = carat, y = price)) +
 
 # appears to be a slight negative correlation between cut and carat. As cut improves, carat decreases.
 # fair diamonds have greater carat
+
+ggplot(diamonds) +
+  geom_point(aes(x = x, y = price), colour = "blue")
+
+ggplot(diamonds) +
+  geom_point(aes(x = y, y = price), colour = "red")
+
+ggplot(diamonds) +
+  geom_point(aes(x = z, y = price), colour = "green")
+
 ggplot(data = diamonds) +
   geom_boxplot(aes(cut, carat))
 
