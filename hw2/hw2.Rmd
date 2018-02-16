@@ -1,35 +1,44 @@
+```{r, echo = FALSE, eval = TRUE}
+    sessionInfo()
+```
 ---
-title: "hw2"
+title: "BIOSTAT-M280: Homework #2"
+author: "Darrick Shen (UID:604946049) "
+subtitle: Due Feb 15 @ 11:59PM
 output: html_document
 ---
-
-sessionInfo()
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = TRUE)
 ```
 
+```{r, echo = FALSE, eval = TRUE}
+  # Please run to ensure multiplot() works.
+    library(ggplot2)
+    library(dplyr)
+    source("http://peterhaschke.com/Code/multiplot.R")
+```
+
 ## 7.3.4 Exercises:
 1. Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
 
-    ```{r}
-    library(ggplot2)
+    ```{r, echo = TRUE, eval = TRUE}
     ggplot(data = diamonds, mapping = aes(x = x)) +
-      geom_freqpoly(binwidth = 0.01) +
-      coord_cartesian(xlim = c(0,20)) -> p1
+      geom_freqpoly(binwidth = 0.01) + coord_cartesian(xlim = c(0,15)) +
+      xlab("Length") + ggtitle("Distribution of Diamond Length") -> p1
 
     ggplot(data = diamonds, mapping = aes(x = y)) +
-      geom_freqpoly(binwidth = 0.01) +
-      coord_cartesian(xlim = c(0,20)) -> p2
+      geom_freqpoly(binwidth = 0.01) + coord_cartesian(xlim = c(0,15)) +
+      xlab("Width") + ggtitle("Distribution of Diamond Width") -> p2
 
     ggplot(data = diamonds, mapping = aes(x = z)) +
-      geom_freqpoly(binwidth = 0.01) +
-      coord_cartesian(xlim = c(0,20)) -> p3
+      geom_freqpoly(binwidth = 0.01) + coord_cartesian(xlim = c(0,15)) +
+      xlab("Depth") + ggtitle("Distribution of Diamond Depth") -> p3
 
-    source("http://peterhaschke.com/Code/multiplot.R")
     multiplot(p1, p2, p3, cols=1)
     ```
+
 The plot for z shows measurements significantly shorter than those found in x and y, while x and y both look to be distributed very similarly. y and z both appear to have outliers. It makes sense to conclude that z is depth, while x is length, y is width (but x and y could be vice versa, as it is hard to distinguish between the two).
 
 2. Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
@@ -404,4 +413,126 @@ The price distribution of very large carat diamonds generally increases positive
     ```
 Length (x) and Width (y) of diamond are strongly positively correlated. Thus, the 2D plot very easily highlights outliers that do not follow the linear relationship. Whereas the 1D plots of length alone, or width alone, may hide these outliers, as either length or width of a diamond alone may follow their respective distributions, but may deviate in length in either width or length. For example, a very long, but narrow diamond, or a very short, but wide diamond may not be an outlier in terms of price, but would be in relation to each other.
 
+## Q2. Tidyverse Commands
+
+The `35.227.165.60:/home/m280-data/hw1` folder contains a typical genetic data set in plink format. If interested, you can read plink documentation at <http://zzz.bwh.harvard.edu/plink/>. But it's definitely not necessary for this homework.
+
+- `merge-geno.bim` contains information of each genetic marker (SNP). Each line is a SNP and has 6 fields:  
+`Chromosome`, `SNP ID`, `Genetic Distance (morgan)`, `Base Pair Position (bp)`, `Allele 1`, `Allele 2`.
+    ```{bash, echo=TRUE, eval=TRUE}
+    head /home/m280-data/hw1/merge-geno.bim
+    ```
+
+- `merge-geno.fam` contains individual information. Each line is one individual and has 6 fields:  
+`Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as 1 (male) or 2 (female), `Affection Status`  
+`Father ID = 0` means that person's father is not in this data set. Similarly `Mother ID` = 0 means that person's mother is not in this data set.
+    ```{bash}
+    head -20 /home/m280-data/hw1/merge-geno.fam
+    ```
+
+- `merge-geno.bed` contains genotypes of each individual in binary format. We don't need this file for this homework.
+
+Please, do **not** put these data files into Git; they are huge. You even don't need to copy them into your directory. Just read from the data folder `/home/m280-data/hw1` directly.
+
+Use Tidyverse commands to answer following questions. 
+    ```{r}
+      # Loading tidyverse and setting working directory for .bim/.fam access.
+    library(tidyverse)
+    setwd("/home/m280-data/hw1")
+      # Reading in SNP and individual datasets.
+    individual <- read_delim("merge-geno.fam", delim = " ", col_names = FALSE)
+    snp <- read_delim("merge-geno.bim", delim = "\t ", col_names = FALSE)
+      # Creating column names for each data set.
+    colnames(individual) <- c("Family.ID", "Person.ID", "Father.ID", "Mother.ID", "Sex", "Affection.Status")
+    colnames(snp) <- c("Chromosome", "SNP.ID", "Genetic.Distance", "BP", "Allele.1", "Allele 2")
+    ```
+1. How many persons are in the data set (statisticians call this `n`)?
+
+    ```{r}
+    count(individual)
+    # Here we are using count to count number of rows in .fam file.
+    ```
+    There are 959 people in the merge-geno.fam data set.
+    
+    How many SNPs are in the data set (statisticians call this `p`)?
+
+    ```{r}
+    count(snp)
+    # Here we are using count to count number of rows in .bim file.
+    ```
+    There are 8,348,674 SNPS in the merge-geno.bim data set.
+    
+2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
+    
+    ```{r}
+    snpCount <- snp %>%
+    group_by(Chromosome) %>%
+    summarise(count = n())
+    snpCount
+    # Here we are grouping by the Chromosome column and creating a new column Count, with the respective counts with summarise().
+    ```
+    The chromosomes contained in this data set are: 3, 5, 7, 9, 11, 13, 15, 17, 19, 21. Respectively there are 1309299, 1215399, 1090185, 980944	, 732013, 815860, 602809, 491208, 477990, 393615 SNPS in each chromosome.
+    
+3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
+
+    ```{r}
+    MAP4 <- snp %>%
+    filter(Chromosome == 3, BP >= 47892180, BP<= 48130769) %>%
+    summarise(count = n())
+    MAP4
+    # Here we use the filter command to specify chromosone and Base Pair (BP) specification for the MAP4 gene.
+    ```
+
+    There are a total of 894 SNPs located with the MAP4 gene.
+
+4. Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <http://www.genetics.ucla.edu/software/mendel>, we have to reformat the data set to be read by Mendel.
+
+      - Mendel's SNP definition file is similar to the plink `bim` file but has format  
+      `SNP ID`, `Chromosome`, `Base Pair Position`  
+      with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like
+    
+    ```{r, echo=FALSE, eval=TRUE}
+    snpDef <- dplyr::select(snp, SNP.ID, Chromosome, BP)
+    write_lines("     2.40 = FILE FORMAT VERSION NUMBER.\n8348674  = NUMBER OF SNPS LISTED HERE.",
+                "/home/shendarrick821/biostat-m280-2018-winter/hw2/mendelSnpDef.txt",
+                append = FALSE)
+    write_delim(snpDef, "/home/shendarrick821/biostat-m280-2018-winter/hw2/mendelSnpDef.txt",
+                delim = ",", col_names = FALSE, append = TRUE)
+    ```
+    
+    ```{bash, echo=FALSE, eval=TRUE}
+    head -10 mendelSnpDef.txt
+    ```
+    
+    The original merge-geno.bim data set has been converted into a Mendel's SNP definition file and stored
+    in the text file named mendel_snpdef.txt. Above we preview 10 lines of the mendel_snpdef.txt file.
+    
+    - Mendel's pedigree file is similar to the plink `fam` file but has format  
+    `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status`  
+    with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to   Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs. First few lines of the Mendel pedigree should look like
+    
+    ```{r}
+    mendPed <- select(individual, Family.ID, Person.ID, Father.ID, Mother.ID, Sex)
+    mendPed <- mutate(mendPed, Twin.Status = 0)
+    mendPed[mendPed == 0] <- NA
+    replace_na(mendPed, list(Father.ID = " ", Mother.ID = " ", Twin.Status = " "))
+
+    finalMendPed <- mendPed %>% 
+    mutate(Sex = if_else(Sex == 2, "F", "M", missing = NULL)) %>%
+    mutate(Person.ID = str_replace_all(Person.ID, "T2DG", "")) %>%
+    mutate(Father.ID = str_replace_all(Father.ID, "T2DG", "")) %>%
+    mutate(Mother.ID = str_replace_all(Mother.ID, "T2DG", ""))
+    write_delim(finalMendPed,
+                "/home/shendarrick821/biostat-m280-2018-winter/hw2/mendelPedigree.txt",
+                delim = ",", col_names = FALSE, append = FALSE, na = "")
+    ```
+    
+    ```{bash, echo=FALSE, eval=TRUE}
+    head -20 mendelPedigree.txt
+    ```
+    
+
+
+    The original merge-geno.fam file has been converted into a plink 'fam' file and has been stored in
+    a text file named mendel_ped.txt. Above we preview 20 lines fom the mendel_ped.txt file.
 
