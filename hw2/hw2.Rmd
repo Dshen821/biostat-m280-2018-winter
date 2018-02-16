@@ -89,7 +89,7 @@ There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat 
       geom_histogram(mapping = aes(x = price)) +
       coord_cartesian(xlim = c(1000, 6000), ylim = c(0, 3500)) -> p2
     
-    multiplot(p2, p1, cols = 1)
+    multiplot(p1, p2, cols = 1)
     ```
 
 Using xlim and ylim functions alone, drops values outside of the xlim, ylim range, before calculating the histogram. This is why the xlim, ylim plot has a lower count than the coord_cartesian plot. Whereas, cartesian_coord does not drop any values, and only "zooms" into the limits defined by xlim and ylim.
@@ -167,15 +167,11 @@ Here we use a boxplot to visualize the departure time distribution for canceled 
 
 2) What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
     ```{r}
-  #lvplot shows that carat is significant for predicting price of diamond.
-# install.packages("lvplot")
-library(lvplot)
+  # carat is significant for predicting price of diamond.
+    
 ggplot(diamonds, aes(x = carat, y = price)) +
-  geom_lv()
-
-
-# appears to be a slight negative correlation between cut and carat. As cut improves, carat decreases.
-# fair diamonds have greater carat
+  geom_hex() +
+  facet_wrap(~cut, ncol = 5)
 
 ggplot(diamonds) +
   geom_point(aes(x = x, y = price), colour = "blue")
@@ -186,11 +182,12 @@ ggplot(diamonds) +
 ggplot(diamonds) +
   geom_point(aes(x = z, y = price), colour = "green")
 
+
+# appears to be a slight negative correlation between cut and carat. As cut improves, carat decreases.
+# fair diamonds have greater carat
+
 ggplot(data = diamonds) +
   geom_boxplot(aes(cut, carat))
-
-ggplot(diamonds, aes(carat, colour = cut)) +
-  geom_density(position = "dodge")
 
 ggplot(data = diamonds) +
   geom_count(mapping = aes(x = cut, y = carat))
@@ -299,6 +296,7 @@ To better illustrate the distribitions of cut within colour and colour within cu
 2)Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?
 
     ```{r}
+    library("nycflights13")
     flights %>%
       group_by(dest, month) %>%
       summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
@@ -381,6 +379,9 @@ Here we parition the distribution of price into 15 bins with the same number of 
 The price distribution of very large carat diamonds generally increases positively. However, the variance in distribution for larger carat diamonds also increases. This can be suprising at first glance, as you would expect large diamonds to definitely increase in price, always. However, factors like cut and clarity-- which can affect price more strongly-- may tend to decrease with increasing carat of diamond. (It is rare to find a large carat diamond that is a high quality cut and high clarity).
 
 4) Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.
+    ```{r}
+    ggplot(data = diamonds, aes(x = cut_number(carat, 8), y = price, color = cut)) + geom_boxplot() + xlab("Carat")
+    ```
 
 5) Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.
     ```{r}
@@ -402,4 +403,5 @@ The price distribution of very large carat diamonds generally increases positive
     geom_freqpoly()
     ```
 Length (x) and Width (y) of diamond are strongly positively correlated. Thus, the 2D plot very easily highlights outliers that do not follow the linear relationship. Whereas the 1D plots of length alone, or width alone, may hide these outliers, as either length or width of a diamond alone may follow their respective distributions, but may deviate in length in either width or length. For example, a very long, but narrow diamond, or a very short, but wide diamond may not be an outlier in terms of price, but would be in relation to each other.
+
 
