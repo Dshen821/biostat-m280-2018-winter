@@ -39,7 +39,7 @@ knitr::opts_chunk$set(eval = TRUE)
     multiplot(p1, p2, p3, cols=1)
     ```
     
-    The plot for z shows measurements significantly shorter than those found in x and y, while x and y both look to be distributed very similarly. y and z both appear to have outliers, as evidenced by     the continuing line throughout the end of the graph, whereas the plot for x appears to stop abruptly after ~10. It makes sense to conclude that z is depth, as diamonds are expected to be both         longer and wider than deep. For the sake of consistency, for the rest of the report we will refer to x as length, and y as width (but based soley on distributions, it could very well be vice          versa, as it is hard to distinguish between the two).
+    The plot for z shows measurements significantly shorter than those found in x and y, while x and y both look to be distributed very similarly. y and z both appear to have outliers, as evidenced by the continuing line throughout the end of the graph, whereas the plot for x appears to stop abruptly, shortly after ~10. It makes sense to conclude that z is depth, as diamonds are expected to be both longer and wider than deep. For the sake of consistency, **for the rest of the report we will refer to x as length, and y as width** (but based soley on distributions, it could very well be vice versa, as it is hard to distinguish between the two).
 
 2. Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
 
@@ -59,7 +59,7 @@ knitr::opts_chunk$set(eval = TRUE)
     bigger <- diamonds %>%
       filter(price <10000 & price > 6000)
     ggplot(data = bigger, mapping = aes(x = price)) +
-      geom_histogram(binwidth = 50) -> p3
+      geom_histogram(binwidth = 1) -> p3
     
       # Filter for prices over 5000.
     upper <- diamonds %>% 
@@ -81,7 +81,7 @@ knitr::opts_chunk$set(eval = TRUE)
     unusual
     ```
 
-    There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat diamonds. That is almost 68 times more 1.00 carat diamonds than 0.99 carat diamonds. There is likely a big price        increase in diamond pricing once they hit the 1.00 carat threshold, leading to upwards rounding at 0.99. 1.00 carat simply sounds better than 0.99 and may lead to customers being more susceptible     to purchasing 1.00 carat diamonds over 0.99 carat diamonds, since the price difference is negligible.
+    There are 1558 observed 1.00 carat diamonds, compared to 23 observed 0.99 carat diamonds. That is almost 68 times more 1.00 carat diamonds than 0.99 carat diamonds. There is likely a big price increase in diamond pricing once they hit the 1.00 carat threshold, leading to upwards rounding at 0.99. 1.00 carat simply sounds better than 0.99 and may lead to customers being more susceptible to purchasing 1.00 carat diamonds over 0.99 carat diamonds, since the price difference is negligible.
 
 4. Compare and contrast coord_cartesian() vs xlim() or ylim() when zooming in on a histogram. What happens if you leave binwidth unset? What happens if you try and zoom so only half a bar shows?
 
@@ -146,7 +146,7 @@ knitr::opts_chunk$set(eval = TRUE)
     multiplot(p1, p2, cols = 1)
     ```
 
-    When attempting to plot a subset of diamond widths(y) with missing values(NA), the missing values are first removed, before the number of observations in each bin is calculated. There will be a       warning message that alerts you "Removed # rows containing non-finite values (stat_bin)". When using geom_bar to plot a subset of categorical data, DiamondMidClarity, the "NA" values are treated      as another gradation, so to speak, of clarity and are subsequently plotted as another category in the bar plot seen above.
+    When attempting to plot a subset of diamond widths(y) with missing values(NA), the missing values are first removed, before the number of observations in each bin is calculated. There will be a warning message that alerts you "Removed # rows containing non-finite values (stat_bin)". When using geom_bar to plot a subset of categorical data, DiamondMidClarity, the "NA" values are treated as another gradation, so to speak, of clarity and are subsequently plotted as another category in the bar plot seen above.
     The reason for this difference is because histograms use continuous quantitative variables on the x-axis, while bar charts position categorical variables over the x-axis. For histograms, it would     not make sense to include NA values on a numeric scale.
 
 2) What does na.rm = TRUE do in mean() and sum()?
@@ -165,7 +165,7 @@ knitr::opts_chunk$set(eval = TRUE)
     mean(ranVals, na.rm = TRUE)
     sum(ranVals, na.rm = TRUE)
     ```
-    When attempting to calculate the mean or sum of a vector with NA values, the result is NA. If we utilize na.rm = TRUE, the NA observations are ommitted from the calculation, allowing us to have a     numerical answer.
+    When attempting to calculate the mean or sum of a vector with NA values, the result is NA. If we utilize na.rm = TRUE, the NA observations are ommitted from the calculation, allowing us to have a numerical answer.
 
 ## 7.5.1.1:
 
@@ -180,18 +180,19 @@ knitr::opts_chunk$set(eval = TRUE)
            departureTime = hour + min
           ) %>%
     ggplot() + ggtitle("Departure time and Canceled Status") +
-      geom_boxplot(mapping = aes(y = departureTime, x = canceledFlight))
+      geom_boxplot(mapping = aes(y = departureTime, x = canceledFlight)) +
+      xlab("Flight Canceled Status")
     flightSub
     ```
 
-    Here we use a boxplot to visualize the departure time distribution for canceled and non-canceled fights. The median departure time and upper and lower quartile ranges of canceled flights occur        later in the day than those of flights that were not canceled. We also see an outlier point at approximately ~1 AM for a canceled flight.
+    Here we use a boxplot to visualize the departure time distribution for canceled and non-canceled fights. The median departure time and upper and lower quartile ranges of canceled flights occur later in the day than those of flights that were not canceled. Further, non-canceled flights to appera to have a narrower inter-quartile range, which makes sense, since the flights were on time. We also see an outlier point at approximately ~1 AM for a canceled flight.
 
 2) What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
     ```{r, echo = FALSE, eval = TRUE}
       # We will plot the variables of interest of diamonds, against price, to see if we can spot a strong correlation.
     ggplot(diamonds, aes(x = carat, y = price)) +
       geom_hex() +
-      ggtitle("Price on Carat Scatter") +
+      ggtitle("Diamond Price on Carat Scatter") +
       xlab("Carat")
       facet_wrap(~cut, ncol = 5)
       
@@ -226,7 +227,7 @@ knitr::opts_chunk$set(eval = TRUE)
 # Consequently as quality of cut increases, price of diamond decreases. (Thus, lower quality cuts, on average, are higher in price)
     ```
     
-    The variables Carat, length, width, and depth all appear to be positively correlated to the price of the diamond. However, intuitively, length, width, and depth are all variables that contribute      to carat (weight) of the diamond. Thus, it is fair to estimate that Carat has substantial colinearity with the physical dimensions of the diamond. After making a boxplot of carat against cut, we      also see that carat is negatively correlated with cut. This makes sense, as  it is difficult to find BOTH high carat size and high cut quality, in the same diamond-- as this would be the "perfect"     diamond. As the carat size increases, the cut quality decreases, thereby decreasing the price of the diamond. This leads us to the fact that on average, lower quality cuts, are higher in price, on     average. 
+    The variables Carat, length, width, and depth all appear to be positively correlated to the price of the diamond. However, intuitively, length, width, and depth are all variables that contribute to carat (weight) of the diamond. Thus, it is fair to estimate that Carat has substantial colinearity with the physical dimensions (x, y, z) of the diamond. After making a boxplot of carat against cut, we also see that carat is negatively correlated with cut. This makes sense, as it is difficult to find BOTH high carat size and high cut quality, in the same diamond-- as this would be the "perfect" diamond. As the carat size increases, the cut quality decreases on average, thereby decreasing the price of the diamond. This leads us to the fact that on average, lower quality cuts, are higher in price, on average. 
  
 3) Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
 
@@ -234,20 +235,25 @@ knitr::opts_chunk$set(eval = TRUE)
     library(ggstance)
     ggplot(data = mpg) +
       geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median),
-                                 y = hwy))
+                                 y = hwy)) +
+        xlab("Vehicle Type") + ylab("Highway Miles per Gallon") + 
+        ggtitle("Highway MPG by Vehicle Type")
     
       # Usage of coord_flip() function to show vehicle classes on the y axis.
     ggplot(data = mpg) +
       geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median),
-                                 y = hwy)) + coord_flip()
+                                 y = hwy)) + coord_flip() +
+        xlab("Vehicle Type") + ylab("Highway Miles per Gallon") + 
+        ggtitle("Highway MPG by Vehicle Type")
       # Usage of ggstance, requires switching the assignment of x and y variables. 
     ggplot(data = mpg) +
       geom_boxploth(mapping = aes(x = hwy,
-                                  y = reorder(class, hwy, FUN = median))) 
-    
+                                  y = reorder(class, hwy, FUN = median))) +
+        ylab("Vehicle Type") + xlab("Highway Miles per Gallon") + 
+        ggtitle("Highway MPG by Vehicle Type")
     ```
 
-    Originally we have the boxplot defined with the classes of vehicles on the x axis, and hwy on the y axis. Thus, when we implement coord_flip, the result is vehicles on the y axis and hwy on the x     axis. By installing ggstance and using the function geom_boxploth, to directly plot a horizontal boxplot, we define hwy on the x axis and vehicle classes on the y, to begin with. The plots            themselves, in either case are identical-- the difference is in defining the x and y varaibles.
+    Originally we have the boxplot defined with the classes of vehicles on the x axis, and hwy on the y axis. Thus, when we implement coord_flip, the result is vehicles on the y axis and hwy on the x axis. By installing ggstance and using the function geom_boxploth, to directly plot a horizontal boxplot, we define hwy on the x axis and vehicle classes on the y, to begin with. The plots themselves, in either case are identical-- the difference is in defining the x and y varaibles.
 
 4) One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
 
@@ -255,29 +261,32 @@ knitr::opts_chunk$set(eval = TRUE)
     library(lvplot)
     ggplot(diamonds, aes(x = cut, y = price)) +
       ggtitle("Price on Cut LV Plot") +
-      xlab("Price (dollars)") +
+      ylab("Price (dollars)") +
     geom_lv()
     ```
  
-    The letter value plot extends the number of "letter value" statistics used. For particularly large datasets (like this one), it provides more visual information on the tail behavior, and displays     fewer outliers. In general, we can see as the cut quality increases from fair to ideal, the upper portion of the plot increases in width at the higher prices. This is intuitive, as "ideal" cut        diamonds, would demand a higher price. We can also notice that the middle to lower portion of "fair" cut diamonds appears to be comparable-- if not even greater-- than higher quality "cut"            diamonds. This supports the fact that the "fair" diamonds being more expensive on average.
+    The letter value plot extends the number of "letter value" statistics used. For particularly large datasets (like this one), it provides more visual information on the tail behavior, and displays fewer outliers. In general, we can see as the cut quality increases from fair to ideal, the upper portion of the plot increases in width at the higher prices. This is intuitive, as "ideal" cut diamonds, would demand a higher price. We can also notice that the middle to lower portion of "fair" cut diamonds appears to be comparable-- if not even greater-- than higher quality "cut" diamonds. This supports the fact that the "fair" diamonds being more expensive on average, however the higher quality diamond plot seems thicker throughout.
 
 5) Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
 
     ```{r, echo = FALSE, eval = TRUE}
     ggplot(data = diamonds,
            mapping = aes(x = price, y = ..density.., colour = cut)) +
-           geom_freqpoly(binwidth = 500) + xlab("Price (dollars)")
+           geom_freqpoly(binwidth = 500) + xlab("Price (dollars)") +
+           ggtitle("Distribution of Diamond Price by Cut: geom_freqpoly")
 
     ggplot(data = diamonds, mapping = aes(x = price, colour = cut)) +
       geom_histogram(binwidth = 50) + xlab("Price (dollars)") +
-      facet_wrap(~cut, ncol = 1, scales = "free_y")
+      ggtitle("Distribution of Diamond Price by Cut: geom_histogram") +
+      facet_wrap(~cut, scales = "free_y") 
 
     ggplot(data = diamonds, mapping = aes(x = cut, y = price)) +
       geom_violin(aes(fill = cut)) + ylab("Price (dollars)") +
+      ggtitle("Distribution of Diamond Price by Cut: geom_violin") +
       coord_flip()
     ```
 
-    Geom_freqpoly allows for easy determination of the highest density of price points for each cut of diamond. However, because the lines are overlapping, it is difficult to say much about individual     distributions of cuts, and how they relate or compare to one another. Because each histogram is separated, geom_histogram makes it easy to distinguish between differences in overall shape of          distribution, and more specifically: variance and skewness. Similarly, geom_violin is useful for comparing distribution of prices, across cuts, but may not be as easy to immediately compare           density of price points.
+    Geom_freqpoly allows for easy determination of the highest density of price points for each cut of diamond. However, because the lines are overlapping, it is difficult to say much about individual distributions of cuts, and how they relate or compare to one another. Because each histogram is separated, geom_histogram makes it easy to distinguish between differences in overall shape of distribution, and more specifically: variance and skewness. Similarly, geom_violin is useful for comparing distribution of prices, across cuts, but may not be as easy to immediately compare density of price points.
 
 6) If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.
 
@@ -285,19 +294,20 @@ knitr::opts_chunk$set(eval = TRUE)
     library("ggbeeswarm")
     ggplot(data = mpg) +
       geom_jitter(mapping = aes(x = reorder(class, hwy, FUN = median),
-                                y = hwy)) + ggtitle("jitter") -> p1
+                                y = hwy)) + ggtitle("geom_jitter") -> p1
 
     ggplot(data = mpg) +
       geom_quasirandom(mapping = aes(x = reorder(class, hwy, FUN = median),
-                                     y = hwy)) + ggtitle("quasirandom") -> p2
+                                     y = hwy)) + ggtitle("geom_quasirandom") -> p2
 
     ggplot(data = mpg) +
       geom_beeswarm(mapping = aes(x = reorder(class, hwy, FUN = median),
-                                  y = hwy)) + ggtitle("beeswarm") -> p3
+                                  y = hwy)) + ggtitle("geom_beeswarm") -> p3
 
     multiplot(p1, p2, p3, col = 1)
     ```
-    Geom_jitter allows us to see the relationship between a continuous and categorical variable by adding a small amount of random variation to each point-- handles the overplotting problem created by     the discreteness in smaller datasets. Geom_beeswarm is closest in shape (most compact) to geom_violin, with points offset from each other. Geom_quasirandom plots are created with points spaced        further away, randomly via different methods including: tukey, tukeyDense, smiley, frowney. In appearance, geom_quasirandom is a jitter/beeswarm hybrid in terms of spacing.
+    
+    Geom_jitter allows us to see the relationship between a continuous and categorical variable by adding a small amount of random variation to each point-- handles the overplotting problem created by the discreteness in smaller datasets. Geom_beeswarm is closest in shape (most compact) to geom_violin, with points offset from each other. Geom_quasirandom plots are created with points spaced further away, randomly via different methods including: tukey, tukeyDense, smiley, frowney. In appearance, geom_quasirandom is a jitter/beeswarm hybrid in terms of spacing.
 
 ## 7.5.2.1:
 1) How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?
@@ -418,7 +428,7 @@ knitr::opts_chunk$set(eval = TRUE)
 
 3) How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?
 
-    Refer to the plot from problem 2). The price distribution of diamonds generally increases with size of carat. However, the variance in distribution for larger carat diamonds also increases. This      can be suprising at first glance, as you would expect large diamonds to definitely increase in price, always. However, factors like cut and clarity-- which can affect price more strongly-- may        tend to decrease with increasing carat of diamond. (It is rare to find a large carat diamond that is a high quality cut and high clarity). Thus, a diamond can be large in size, but poor in clarity     and cut and have lower price than expected.
+    Refer to the plot from problem 2). The price distribution of diamonds generally increases with size of carat. However, the variance in distribution for larger carat diamonds also increases. This can be suprising at first glance, as you would expect large diamonds to definitely increase in price, always. However, factors like cut and clarity-- which can affect price more strongly-- may        tend to decrease with increasing carat of diamond. (It is rare to find a large carat diamond that is a high quality cut and high clarity). Thus, a diamond can be large in size, but poor in clarity     and cut and have lower price than expected.
 
 4) Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.
 
