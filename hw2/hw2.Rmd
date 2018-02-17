@@ -497,6 +497,8 @@ From the above boxplot, we can see that carat size is clearly positively correla
       geom_freqpoly() +
       xlab("Prices (dollars)") +
       ggtitle("1D Plot of Width")
+    
+      # Note: References made from https://jrnold.github.io/r4ds-exercise-solutions/
     ```
    
     Length (x) and Width (y) of diamond are strongly positively correlated. Thus, the 2D plot very easily highlights outliers that do not follow the linear relationship. Whereas the 1D plots of length  alone, or width alone, may hide these outliers. This is because either length or width of a diamond alone may follow their respective distributions, but may deviate in the other dimension, compared to other diamonds. For example, a very long, but narrow diamond, or a very short, but wide diamond may not be an outlier in terms of price, but would be in terms of relative dimensions.
@@ -627,4 +629,5 @@ Use Tidyverse commands to answer following questions.
     
     The original merge-geno.fam file has been converted into a plink 'fam' file and has been stored in
     a text file named mendelPedigree.txt. Above we preview 20 lines fom the mendelPedigree.txt file.
+
 
