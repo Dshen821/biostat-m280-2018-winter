@@ -45,15 +45,15 @@ knitr::opts_chunk$set(eval = TRUE)
     ```{r, echo = TRUE, eval = TRUE}
     ggplot(data = diamonds, mapping = aes(x = x)) +
       geom_freqpoly(binwidth = 0.01) + coord_cartesian(xlim = c(0, 15)) +
-      xlab("Length") + ggtitle("Distribution of Diamond Length") -> p1
+      xlab("Length (mm)") + ggtitle("Distribution of Diamond Length") -> p1
 
     ggplot(data = diamonds, mapping = aes(x = y)) +
       geom_freqpoly(binwidth = 0.01) + coord_cartesian(xlim = c(0, 15)) +
-      xlab("Width") + ggtitle("Distribution of Diamond Width") -> p2
+      xlab("Width (mm)") + ggtitle("Distribution of Diamond Width") -> p2
 
     ggplot(data = diamonds, mapping = aes(x = z)) +
       geom_freqpoly(binwidth = 0.01) + coord_cartesian(xlim = c(0, 15)) +
-      xlab("Depth") + ggtitle("Distribution of Diamond Depth") -> p3
+      xlab("Depth (mm)") + ggtitle("Distribution of Diamond Depth") -> p3
 
     multiplot(p1, p2, p3, cols = 1)
     ```
@@ -157,7 +157,8 @@ knitr::opts_chunk$set(eval = TRUE)
       # Creating a subset from
     n <- nrow(diamonds)
     diamondMidClarity <- diamonds %>%
-      mutate(clarity = if_else(rnorm(n) < 0.0001, NA_character_, as.character(cut))) 
+      mutate(clarity = if_else(rnorm(n) < 0.0001, NA_character_,
+                               as.character(cut))) 
     ggplot(diamondMidClarity) +
       geom_bar(mapping = aes(x = clarity)) +
       ggtitle("Distribution of Diamond Clarity") -> p2
@@ -346,7 +347,7 @@ knitr::opts_chunk$set(eval = TRUE)
       mutate(percentage = n / sum(n)) %>%
       ggplot(mapping = aes(x = color, y = cut, fill = percentage)) +
       ggtitle("Distribution of Cut within Color") +
-      geom_tile() -> p1
+      geom_tile()
       # Colour within Cut.
     diamonds %>% 
       count(color, cut) %>%
@@ -354,7 +355,7 @@ knitr::opts_chunk$set(eval = TRUE)
       mutate(percentage = n / sum(n)) %>%
       ggplot(mapping = aes(x = color, y = cut, fill = percentage)) +
         ggtitle("Distribution of Color within Cut") +
-        geom_tile() -> p2
+        geom_tile() 
     ```
 
     To better illustrate the distribitions of cut within colour and colour within cut, instead  of using counts in the plot, we can calculate the proportion that fall into each color and cut type and plot by proportion to more clearly illustrate distribution category. This standardizes our results, as some categories of diamond colors and cut may have more total coutns than other.
@@ -435,7 +436,7 @@ knitr::opts_chunk$set(eval = TRUE)
                mapping = aes(x = price,
                              y = ..density..,
                              colour = cut_number(carat, 6))) +
-          geom_freqpoly()
+          geom_freqpoly() +
           ggtitle("Densities of Price using cut_width") 
    ```
 
@@ -602,10 +603,12 @@ Use Tidyverse commands to answer following questions.
     with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to   Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs. First few lines of the Mendel pedigree should look like
     
     ```{r, echo = TRUE, eval = TRUE, results = "hide"}
-    mendPed <- dplyr::select(individual, Family.ID, Person.ID, Father.ID, Mother.ID, Sex)
+    mendPed <- dplyr::select(individual, Family.ID, Person.ID, Father.ID,
+                             Mother.ID, Sex)
     mendPed <- mutate(mendPed, Twin.Status = 0)
     mendPed[mendPed == 0] <- NA
-    replace_na(mendPed, list(Father.ID = " ", Mother.ID = " ", Twin.Status = " "))
+    replace_na(mendPed, list(Father.ID = " ", Mother.ID = " ",
+                             Twin.Status = " "))
 
     finalMendPed <- mendPed %>% 
      mutate(Sex = if_else(Sex == 2, "F", "M", missing = NULL)) %>%
