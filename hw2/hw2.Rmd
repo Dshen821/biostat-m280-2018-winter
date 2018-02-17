@@ -587,7 +587,7 @@ Use Tidyverse commands to answer following questions.
     ```{r, echo = TRUE, eval = TRUE}
     snpDef <- dplyr::select(snp, SNP.ID, Chromosome, BP)
     line <- paste("    2.40 = FILE FORMAT VERSION NUMBER.\n",
-                  "8348674  = NUMBER OF SNPS LISTED HERE.", sep = "")
+                  "8348674 = NUMBER OF SNPS LISTED HERE.", sep = "")
     write_lines(line, "mendelSnpDef.txt", append = FALSE)
     write_delim(snpDef, "mendelSnpDef.txt",
                 delim = ",", col_names = FALSE, append = TRUE)
