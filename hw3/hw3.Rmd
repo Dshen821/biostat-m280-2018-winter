@@ -1,0 +1,189 @@
+title: "Biostat M280 Homework 3"
+subtitle: Due Mar 2 @ 11:59PM
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1 LA City Employee Payroll
+
+The `/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv` file on teaching server contains payroll information of LA City employees in years 2013-2017. It was downloaded from [LA City Controller's Office](https://controllerdata.lacity.org/Payroll/City-Employee-Payroll/pazn-qyym). Make a Shiny app to facilitate exploratory data analysis. 
+
+1. For efficiency of the Shiny app, you should first pre-process, pare down, tidy, and save the data, e.g., as a compressed RDS file, to be used in the app.
+
+0. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
+
+0. **Who earned most?** Visualize the payroll information (total payment with breakdown into base pay, overtime pay, and other pay, Department, Job Title) of the top $n$ highest paid LA City employees in a specific year. User specifies $n$ (default 10) and year (default 2017).
+
+0. **Which departments earn most?** Visualize the mean or median payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ earning departments. User specifies $n$ (default 5), year (default 2017), and method (mean or median, default median).
+
+0. **Which departments cost most?** Visualize the total payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ expensive departments. User specifies $n$ (default 5) and year (default 2017).
+
+0. Visualize any other information you are interested in.
+
+0. Publish your Shiny app to <https://www.shinyapps.io> and share the link.
+
+## Q2 LA City Parking War
+
+The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on teaching server contains information about parking tickets in LA City. It was downloaded from [LA Open Data Portal](https://data.lacity.org/A-Well-Run-City/Parking-Citations/wjz9-h9np). Connect to the database and answer following questions using plots and summary statistics. In this exercise, you are **not** allowed to load whole data into memory. Use the _transform in database, plot in R_ strategy.
+
+1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
+```{r}
+library("DBI")
+library("RSQLite")
+library("lubridate")
+  # connect to database.
+con <- dbConnect(RSQLite::SQLite(), dbname = "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
+dbListTables(con)
+
+  # querying tables.
+res <- dbSendQuery(con, "SELECT * FROM latix")
+dbFetch(res)
+
+latix_sql <- dplyr::tbl(con, "latix")
+library("tidyverse")
+latix_sql %>%
+  count()
+# 4,044,488 rows
+```
+Includes tickets with NA ID.
+```{sql connection=con}
+SELECT
+    count(DISTINCT Ticket_number)
+FROM
+    latix
+```
+Distinct ticket numbers.
+```{r}
+ascend <- latix_sql %>%
+filter(!is.na(Issue_Year)) %>%
+select(Issue_Year, Issue_Month, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute) %>%
+arrange(Issue_Year, Issue_Month, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute)
+head(ascend)
+
+descend <- latix_sql %>%
+filter(!is.na(Issue_Year)) %>%
+select(Issue_Year, Issue_Month, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute) %>%
+arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Month), desc(Issue_Day), desc(Issue_Hour), desc(Issue_Minute))
+head(descend)
+
+latix_sql %>% 
+  filter(!is.na(Issue_Year)) %>%
+  group_by(Issue_Year) %>%
+  summarize (n = n())
+```
+
+There are 4044338 distinct ticket numbers. In addition 150 tickets had a NA ticket ID 
+The oldest issued ticket was on 2010-04-27, at 21:40.
+The most recently issued ticket was on 2017-12-30, at 01:41.
+The most tickets were issued in 2015 (2161119 tickets). Removing for tickets with no issue year, but including tickets with ID: NA.
+
+0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+```{r}
+
+dt <- dbSendQuery(con, "SELECT Issue_Year, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute FROM latix")
+dbFetch(dt)
+
+
+hours <- dt %>%
+  count(Issue_Hour)
+
+days <- dt %>%
+  count(Issue_Day)
+
+month <- dt %>%
+  count(Issue_Month)
+
+*latix_sql %>%
+  group_by(Make) %>%
+  count() %>%
+  collect() %>%
+  ggplot() +
+      geom_col(aes(x = Make, y = n))
+
+
+
+```
+
+3) Which car makes received most citations?
+```{r}
+
+  make <- latix_sql %>%
+      group_by(Make) %>%
+      tally() %>%
+      collect() %>%
+      filter(n == max(n)) %>%
+      arrange(desc(n))
+
+  makebodcol <- latix_sql %>%
+      group_by(Make, Body_Style, Color) %>%
+      tally() %>%
+      collect() %>%
+      filter(n == max(n)) %>%
+      arrange(desc(n))
+  
+  latix_sql %>%
+  group_by(Make) %>%
+  count() %>%
+  collect() %>%
+  ggplot() +
+      geom_col(aes(x = Make, y = n))
+
+
+```
+
+4) How many different colors of cars were ticketed? Which color attracted most tickets?
+```{sql connection=con}
+SELECT
+    count(DISTINCT Color)
+FROM
+    latix
+```
+65 different colors
+```{r}
+  col <- latix_sql %>%
+      group_by(Color) %>%
+      tally() %>%
+      collect() %>%
+      filter(n == max(n)) %>%
+      arrange(desc(n))
+col
+```
+ Color "BK" most tickets. (n=862283)
+5) What are the most common ticket types?
+
+```{r}
+  violationType <- latix_sql %>%
+          group_by(Violation_Description) %>%
+          tally() %>%
+          collect() %>%
+          filter(n == max(n)) %>%
+          arrange(desc(n))
+violationType
+```
+Most common ticket type was "NO PARK/STREET CLEAN", with a total of 1149021.
+6) How much money was collected on parking tickets in 2015 and 2016?
+```{r}
+fifteenSixteen <- latix_sql %>%
+  select(Issue_Year, Fine_amount) %>%
+  filter(Issue_Year == 2016 | Issue_Year ==2015) %>%
+  group_by(Issue_Year) %>%
+  summarize(totalfine = sum(Fine_amount, na.rm = TRUE))
+
+fifteenSixteen
+```
+Total fine amount in 2015 was 151006794.
+Total fine amount in 2016 was 123236136.
+7) Visualize any other information you are interested in.
+```{r}
+latix_sql %>%
+  select(Issue_Year) %>%
+  group_by(Issue_Year) %>% 
+  summarize(n = n()) %>%
+  ggplot(aes(x = Issue_Year, y = n)) + 
+    geom_line() + 
+    xlim(mdy("7/1/2010"), mdy("6/30/2017"))
+```
+
