@@ -176,7 +176,12 @@ latix_sql %>%
   kable()
 
 ```
-
+Most likely hour 12, least likely hour 5.
+Most likely day 22, least likely day 31.
+Most likely weekday tuesdays.
+Least likely weekday 
+Most likely Month March.
+Least likely Month Nov.
 3) Which car makes received most citations?
 ```{r}
 
@@ -197,8 +202,25 @@ latix_sql %>%
     top_n(5)%>%
   ggplot() +
       geom_col(aes(x = Make, y = num))
+  
+  latix_sql %>%
+  group_by(Make) %>%
+  filter( Make == "TOYO") %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
+  collect() %>%
+    kable()
+  
+  latix_sql %>%
+  group_by(Make) %>%
+  filter( Make == "TOYO") %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
+  collect() %>%
+  ggplot() +
+      geom_col(aes(x = Make, y = num))
 ```
-
+TOYT recieved the most citations at 669548. Also 39180 TOYO.
 4) How many different colors of cars were ticketed? Which color attracted most tickets?
 ```{sql connection=con}
 SELECT
@@ -255,10 +277,24 @@ Most common ticket type was "NO PARK/STREET CLEAN", with a total of 1149021.
 ```{r}
   latix_sql %>%
   select(Issue_Year, Fine_amount) %>%
-  filter(Issue_Year == 2016 | Issue_Year ==2015) %>%
+  filter(Issue_Year == 2016 | Issue_Year == 2015) %>%
   group_by(Issue_Year) %>%
-  summarize(totalfine = sum(Fine_amount, na.rm = TRUE)) %>% kable(col.names = c("Issue Year ", "  Number of Tickets"))
+  summarize(totalfine = sum(Fine_amount, na.rm = TRUE)) %>% kable(col.names = c("Issue Year ", "   Total Fine Amount ($)"))
 
+
+  latix_sql %>%
+  select(Issue_Year, Fine_amount) %>%
+  filter(Issue_Year == 2016 | Issue_Year == 2015) %>%
+  group_by(Issue_Year) %>%
+  summarize(totalfine = sum(Fine_amount, na.rm = TRUE)) %>%
+  collect() %>%
+      ggplot() +
+      geom_col(aes(x = Issue_Year, y = totalfine)) + 
+       scale_x_continuous("Issue Years", breaks = c(1, 2),
+                     label = c("2015", "2016")) +
+                     ggtitle("Total Fines During 2015-2016") +
+                     labs( y =  "Total Fine")
+    
 ```
 Total fine amount in 2015 was 151006794.
 Total fine amount in 2016 was 123236136.
