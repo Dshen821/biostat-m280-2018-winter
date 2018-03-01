@@ -31,9 +31,22 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 
 1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
 ```{r}
-library("DBI")
-library("RSQLite")
-library("lubridate")
+    if (!"tidyverse" %in% rownames(installed.packages()))  
+      install.packages("tidyverse", repos = "http://cran.rstudio.com/")
+    
+    if (!"DBI" %in% rownames(installed.packages()))  
+      install.packages("DBI", repos = "http://cran.rstudio.com/")
+    
+    if (!"RSQLite" %in% rownames(installed.packages()))  
+      install.packages("RSQLite", repos = "http://cran.rstudio.com/")
+    
+    if (!"dbplyr" %in% rownames(installed.packages()))  
+      install.packages("dbplyr", repos = "http://cran.rstudio.com/")
+
+    if (!"knitr" %in% rownames(installed.packages()))  
+      install.packages("knitr", repos = "http://cran.rstudio.com/")
+    
+
   # connect to database.
 con <- dbConnect(RSQLite::SQLite(), dbname = "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
 dbListTables(con)
@@ -44,8 +57,6 @@ dbFetch(res)
 
 latix_sql <- dplyr::tbl(con, "latix")
 library("tidyverse")
-latix_sql %>%
-  count()
 # 4,044,488 rows
 ```
 Includes tickets with NA ID.
@@ -55,7 +66,7 @@ SELECT
 FROM
     latix
 ```
-Distinct ticket numbers.
+4044338 distinct ticket numbers.
 ```{r}
 ascend <- latix_sql %>%
 filter(!is.na(Issue_Year)) %>%
@@ -73,6 +84,15 @@ latix_sql %>%
   filter(!is.na(Issue_Year)) %>%
   group_by(Issue_Year) %>%
   summarize (n = n())
+
+latix_sql %>%
+group_by(Issue_Year) %>%
+filter(!is.na(Issue_Year)) %>%
+summarise(num=n()) %>%
+collect() %>%
+  ggplot() +
+  geom_col(aes(x = Issue_Year, y = num)) +
+  scale_x_continuous("Issue Years") + ggtitle("Distribution of Issued Ticket")
 ```
 
 There are 4044338 distinct ticket numbers. In addition 150 tickets had a NA ticket ID 
@@ -80,58 +100,103 @@ The oldest issued ticket was on 2010-04-27, at 21:40.
 The most recently issued ticket was on 2017-12-30, at 01:41.
 The most tickets were issued in 2015 (2161119 tickets). Removing for tickets with no issue year, but including tickets with ID: NA.
 
-0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+2) When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+
+```{sql connection=con}
+SELECT Issue_Hour, Issue_Day, Issue_Month, Issue_Wday, count(*) FROM latix
+group by Issue_Hour, Issue_Day, Issue_Month, Issue_Wday
+order by count (*) desc
+limit 5;
+```
+
+
+
+
 ```{r}
 
-dt <- dbSendQuery(con, "SELECT Issue_Year, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute FROM latix")
-dbFetch(dt)
-
-
-hours <- dt %>%
-  count(Issue_Hour)
-
-days <- dt %>%
-  count(Issue_Day)
-
-month <- dt %>%
-  count(Issue_Month)
-
-*latix_sql %>%
-  group_by(Make) %>%
-  count() %>%
+latix_sql %>%
+group_by(Issue_Hour) %>%
+filter(!is.na(Issue_Hour)) %>%
+summarise(num=n()) %>%
   collect() %>%
   ggplot() +
-      geom_col(aes(x = Make, y = n))
+      geom_col(aes(x = Issue_Hour, y = num))
+  
+       
+
+latix_sql %>%
+group_by(Issue_Day) %>%
+filter(!is.na(Issue_Day)) %>%
+summarise(num=n()) %>%
+  collect() %>%
+  ggplot() +
+      geom_col(aes(x = Issue_Day, y = num))
+  
+latix_sql %>% 
+group_by(Issue_Wday) %>%
+filter(!is.na(Issue_Wday)) %>%
+summarise(num=n()) %>%
+  collect() %>%
+  ggplot() +
+      geom_col(aes(x = Issue_Wday, y = num))  +
+  scale_x_continuous("Issue Week Days", breaks = c(1, 2, 3, 4, 5, 6, 7),
+                     label = c("Sun.", "Mon.", "Tues.", "Wed.", "Thurs.", "Fri.", "Sat.")) + ggtitle("Distribution of Issued Tickets on Weekdays")
+  
+latix_sql %>%
+group_by(Issue_Month) %>%
+filter(!is.na(Issue_Month)) %>%
+summarise(num=n()) %>%
+collect() %>%
+  ggplot() +
+  geom_col(aes(x = Issue_Month, y = num)) +
+  scale_x_continuous("Issue Months", breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+                     label = c("Jan.", "Feb.", "Mar.", "April", "May.", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec.")) + ggtitle("Distribution of Issued Ticket")
+  
 
 
+latix_sql %>%
+  filter(!is.na(Issue_Hour)) %>%
+  count(Issue_Hour) %>%
+  arrange(n) %>%
+  collect() %>%
+  kable()
+
+latix_sql %>%
+  filter(!is.na(Issue_Day)) %>%
+  count(Issue_Day) %>%
+  arrange(n) %>%
+  collect() %>%
+  kable()
+
+latix_sql %>%
+  filter(!is.na(Issue_Month)) %>%
+  count(Issue_Month) %>%
+  arrange(n) %>%
+  collect() %>%
+  kable()
 
 ```
 
 3) Which car makes received most citations?
 ```{r}
 
-  make <- latix_sql %>%
+  latix_sql %>%
       group_by(Make) %>%
       tally() %>%
       collect() %>%
       filter(n == max(n)) %>%
       arrange(desc(n))
 
-  makebodcol <- latix_sql %>%
-      group_by(Make, Body_Style, Color) %>%
-      tally() %>%
-      collect() %>%
-      filter(n == max(n)) %>%
-      arrange(desc(n))
-  
+
+# plot of cares with most cars;
   latix_sql %>%
   group_by(Make) %>%
-  count() %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
   collect() %>%
+    top_n(5)%>%
   ggplot() +
-      geom_col(aes(x = Make, y = n))
-
-
+      geom_col(aes(x = Make, y = num))
 ```
 
 4) How many different colors of cars were ticketed? Which color attracted most tickets?
@@ -150,6 +215,15 @@ FROM
       filter(n == max(n)) %>%
       arrange(desc(n))
 col
+
+  latix_sql %>%
+  group_by(Color) %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
+  collect() %>%
+    top_n(5)%>%
+  ggplot() +
+      geom_col(aes(x = Color, y = num))
 ```
  Color "BK" most tickets. (n=862283)
 5) What are the most common ticket types?
@@ -162,28 +236,52 @@ col
           filter(n == max(n)) %>%
           arrange(desc(n))
 violationType
+
+
+  latix_sql %>%
+  group_by(Violation_Description) %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
+  collect() %>%
+    top_n(5)%>%
+  ggplot() +
+      geom_col(aes(x = Violation_Description, y = num)) +
+      xlab("Violation Description") + ylab("Number") +
+      coord_flip()
+
 ```
 Most common ticket type was "NO PARK/STREET CLEAN", with a total of 1149021.
 6) How much money was collected on parking tickets in 2015 and 2016?
 ```{r}
-fifteenSixteen <- latix_sql %>%
+  latix_sql %>%
   select(Issue_Year, Fine_amount) %>%
   filter(Issue_Year == 2016 | Issue_Year ==2015) %>%
   group_by(Issue_Year) %>%
-  summarize(totalfine = sum(Fine_amount, na.rm = TRUE))
+  summarize(totalfine = sum(Fine_amount, na.rm = TRUE)) %>% kable(col.names = c("Issue Year ", "  Number of Tickets"))
 
-fifteenSixteen
 ```
 Total fine amount in 2015 was 151006794.
 Total fine amount in 2016 was 123236136.
 7) Visualize any other information you are interested in.
 ```{r}
-latix_sql %>%
-  select(Issue_Year) %>%
-  group_by(Issue_Year) %>% 
-  summarize(n = n()) %>%
-  ggplot(aes(x = Issue_Year, y = n)) + 
-    geom_line() + 
-    xlim(mdy("7/1/2010"), mdy("6/30/2017"))
+
+  latix_sql %>%
+  group_by(RP_State_Plate) %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
+  collect() %>%
+    top_n(7)%>%kable()
+  
+  latix_sql %>%
+  group_by(RP_State_Plate) %>%
+  summarise(num=n()) %>%
+  arrange(desc(num)) %>%
+  collect() %>%
+    top_n(7)%>%
+  ggplot() +
+      geom_col(aes(x = RP_State_Plate, y = num)) +
+      xlab("Ticketed License Plate State") + ylab("Number") 
+
 ```
 
+California is the most frequently ticketed license plate at 3766908 times, with the most ticketed out-of-state licenses as Arizona, Texas, and Nevada, in descending order.
