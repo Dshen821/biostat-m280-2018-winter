@@ -4,78 +4,31 @@ library(ggplot2)
 library(shiny)
 library(dplyr)
 
-  # Here we read in the payroll dataset and rename column names to exlcude spaces.
-#  LAdata<- read.csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
-LAdata2<- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
-colnames(LAdata2) <- str_replace_all(names(pay.raw), " ", "_")
-colnames(LAdata2)[24] <- "Other_Paye"
-head(LAdata2)
-
-LAEmployeePay <- LAdata2 %>%
-  select(Row_ID, Year, Department_Title, Job_Class_Title, Total_Payments,
-         Base_Pay, Other_Paye, Overtime_Pay, Total_Payments,
-         Average_Benefit_Cost, Average_Dental_Cost)
-  
-LAEmployeePay$Total_Payments <- ifelse(!is.na(LAEmployeePay$Total_Payments), 
-                                       as.numeric(str_replace
-                                                  (LAEmployeePay$Total_Payments,
-                                                    "\\$", "")), NA)
-
-LAEmployeePay$Base_Pay <- ifelse(!is.na(LAEmployeePay$Base_Pay), 
-                                       as.numeric(str_replace
-                                                  (LAEmployeePay$Base_Pay,
-                                                    "\\$", "")), NA)
-
-LAEmployeePay$Other_Paye <- ifelse(!is.na(LAEmployeePay$Other_Paye), 
-                                 as.numeric(str_replace
-                                            (LAEmployeePay$Other_Paye,
-                                              "\\$", "")), NA)
-
-LAEmployeePay$Overtime_Pay<- ifelse(!is.na(LAEmployeePay$Overtime_Pay), 
-                                   as.numeric(str_replace
-                                              (LAEmployeePay$Overtime_Pay,
-                                                "\\$", "")), NA)
-
-LAEmployeePay$Average_Benefit_Cost<- ifelse(!is.na(LAEmployeePay$Average_Benefit_Cost), 
-                                    as.numeric(str_replace
-                                               (LAEmployeePay$Average_Benefit_Cost,
-                                                 "\\$", "")), NA)
-LAEmployeePay$Average_Dental_Cost<- ifelse(!is.na(LAEmployeePay$Average_Dental_Cost), 
-                                            as.numeric(str_replace
-                                                       (LAEmployeePay$Average_Dental_Cost,
-                                                         "\\$", "")), NA) 
-
-LAEP <-LAEmployeePay %>% rename(Total.Payments = Total_Payments,
-                                Base.Pay = Base_Pay, Other.Pay = Other_Paye,
-                                Overtime.Pay = Overtime_Pay,
-                                Avg.Ben.Cost = Average_Benefit_Cost,
-                                Avg.Den.Cost = Average_Dental_Cost)
-head(LAEP)
-
-saveRDS(LAEP, "LAPayroll.rds")
-LA.payroll <- readRDS("LAPayroll.rds")
+LApayroll <- readRDS("LAPayroll.rds")
   # We only want to keep complete data.
-LA.payroll <- LA.payroll[complete.cases(LA.payroll),]
+# LApayroll <- LApayroll[complete.cases(LApayroll),]
+
+# Total payroll by LA City. Visualize the total LA City payroll of each year, 
+# with breakdown into base pay, overtime pay, and other pay.
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
    # Application title
-   titlePanel("Old Faithful Geyser Data"),
+   titlePanel("LA City Employee Payroll"),
    
-   # Sidebar with a slider input for number of bins 
+   # Sidebar with a slider input for years and pay types
    sidebarLayout(
       sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
-      ),
-      
+        selectInput("Pay",
+                    label = "Select Pay Category",
+                    choices = c("Base Pay", "OT Pay", "Other Pay", "Total Pay"),
+                    selected = "Base Pay")
+                   ),
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot")
+        plotOutput("distPlot")
       )
    )
 )
@@ -84,12 +37,26 @@ ui <- fluidPage(
 server <- function(input, output) {
    
    output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
+     LApayroll$Pay <-switch(input$Pay, 
+                       "Base Pay" = LApayroll$Base.Pay,
+                       "OT Pay" = LApayroll$OT.Pay,
+                       "Other Pay" = LApayroll$Other.Pay,
+                       "Total Pay" = LApayroll$Total.Payments)
+     LApayroll %>%
+       select(Year, Pay) %>%
+       group_by(Year) %>%
+       summarise(TotalPay = sum(Pay, na.rm = TRUE)) %>%
+       ggplot(mapping = aes(x = Year, y = TotalPay)) +
+       geom_col()
+     
+     
+     #payroll <- LApayroll %>%
+     # select(Row_ID, Year, Base.Pay, Other.Pay, OT.Pay) %>%
+     #group_by(Year) %>%
+     #summarise(sumOfBase = sum(Base.Pay),
+     #         sumOfOther = sum(Other.Pay),
+     #        sumOfOT = sum(OT.Pay)) %>%
+     #gather(sumOfBase, sumOfOther, sumOfOT, value = "amount", key = "type")
    })
 }
 
