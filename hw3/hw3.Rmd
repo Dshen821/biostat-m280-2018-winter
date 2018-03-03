@@ -124,7 +124,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     ```
 
     
-    ```{sql connection=con}
+    ```{sql connection = con}
     SELECT
         count(DISTINCT Ticket_number)
     FROM
@@ -159,7 +159,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     latix_sql %>%
       group_by(Issue_Year) %>%
       filter(!is.na(Issue_Year)) %>%
-      summarise(num=n()) %>%
+      summarise(num = n()) %>%
       collect() %>%
       ggplot() +
         geom_col(aes(x = Issue_Year, y = num)) +
@@ -202,7 +202,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     latix_sql %>% 
       group_by(Issue_Wday) %>%
       filter(!is.na(Issue_Wday)) %>%
-      summarise(num=n()) %>%
+      summarise(num = n()) %>%
       collect() %>%
       ggplot() +
         geom_col(aes(x = Issue_Wday, y = num)) +
@@ -226,8 +226,8 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
         scale_x_continuous("Issue Months",
                            breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 
                            label = c("Jan.", "Feb.", "Mar.", "April", "May.",
-                                       "June", "July", "Aug.", "Sept.", "Oct.",
-                                       "Nov.", "Dec.")) +
+                                     "June", "July", "Aug.", "Sept.", "Oct.",
+                                     "Nov.", "Dec.")) +
         ggtitle("Distribution of Issued Tickets by Month") +
         xlab("Month") +
         ylab("Issued Tickets")
@@ -286,7 +286,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       # Most ticketed day of the week.
     latix_sql %>%
       filter(!is.na(Issue_Wday)) %>%
-      count(Issue_Month) %>%
+      count(Issue_Wday) %>%
       arrange(n) %>%
       collect() %>%
       head(1) %>%
@@ -294,7 +294,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       # Least ticketed day of the week.
     latix_sql %>%
       filter(!is.na(Issue_Wday)) %>%
-      count(Issue_Month) %>%
+      count(Issue_Wday) %>%
       arrange(n) %>%
       collect() %>%
       tail(1) %>%
@@ -332,7 +332,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       latix_sql %>%
         group_by(Make) %>%
         filter( Make == "TOYO") %>%
-        summarise(num=n()) %>%
+        summarise(num = n()) %>%
         arrange(desc(num)) %>%
         collect() %>%
           kable()
@@ -340,7 +340,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     latix_sql %>%
       group_by(Make) %>%
       filter(Make == "TOYO") %>%
-      summarise(num=n()) %>%
+      summarise(num = n()) %>%
       arrange(desc(num)) %>%
       collect() %>%
       ggplot() +
@@ -352,8 +352,8 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 Toyota (TOYT) recieved the most citations at 669,548. We also notice 39,180 "TOYO" makes, which is likely also Toyota vehicles.
 
 4) How many different colors of cars were ticketed? Which color attracted most tickets?
-    ```{sql connection=con}
-    SELECT
+    ```{sql connection = con}
+    SELECT 
         count(DISTINCT Color)
     FROM
         latix
@@ -429,7 +429,7 @@ The most common ticket type was "NO PARK/STREET CLEAN", with a total of 1,149,02
         scale_x_continuous("Issue Years", breaks = c(1, 2),
                      label = c("2015", "2016")) +
                      ggtitle("Total Fines During 2015-2016") +
-                     labs( y =  "Total Fine")
+                     labs( y = "Total Fine")
     ```
 
 
