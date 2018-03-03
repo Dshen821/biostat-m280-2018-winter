@@ -16,53 +16,96 @@ LApayroll <- readRDS("LAPayroll.rds")
 ui <- fluidPage(
    
    # Application title
-   titlePanel("LA City Employee Payroll"),
+    titlePanel("LA City Employee Payroll Statistics"),
    
-   # Sidebar with a slider input for years and pay types
-     sidebarLayout(
-     sidebarPanel(
-        selectInput("Pay",
-                    label = "Select Pay Category",
-                    choices = c("Base Pay", "OT Pay", "Other Pay", "Total Pay"),
-                    selected = "Base Pay"),
-        selectInput("Year",
-                    label = "Select Year",
-                    choices = c("2013", "2014", "2015", "2016", "2017"),
-                    selected = "2017"),
+   # Sidebar with a slider input for years and pay types.
+    tabsetPanel(
+      tabPanel("Total Pay Roll by City",
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(inputId = "Pay",
+                        label = "Select a Pay Type:",
+                        choices = c("Base Pay", "OT Pay",
+                                    "Other Pay", "Total Pay"),
+                        selected = "Base Pay")
+          ),
+          mainPanel = plotOutput("distPlot")
+        )
+      ),
+   # Q3
+      tabPanel("Who earned most?",
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(inputId = "Year",
+                        label = "Select a Year",
+                        choices = c("2013", "2014", "2015", "2016", "2017"),
+                        selected = "2017"),
          
-        
-        sliderInput("nTopEarners",
-                    label = "Information for Top Earners",
-                    max = 10,
-                    min = 1,
-                    value = 10),
-        
-        selectInput(inputId = "Q4",
-                    label = "Select Summary Statistic:",
-                    choices = c("mean", "median"),
-                    selected = "mean"),
-        
-        
-        sliderInput(inputId = "nDepts",
-                    label = "Number of Departments Shown:",
-                    max = 10,
-                    min = 1,
-                    value = 5)
-        ),
-    
-     
-      # Show a plot of the generated distribution;
-      mainPanel(
-        tabsetPanel(
-          #
-          tabPanel("Total payroll by LA City", plotOutput("distPlot")),
-          tabPanel("Who earned most?", tableOutput("distTable")),
-          tabPanel("Which departments earn most?", tableOutput("distTableQ4")),
-          tabPanel("Which departments cost most?", tableOutput("distTableQ5")),
-          tabPanel("Plot for 6", plotOutput("distPlotQ7"))
+            sliderInput("nTopEarners",
+                        label = "Information for Top Earners",
+                        max = 10,
+                        min = 1,
+                        value = 10)
+          ),
+          mainPanel = tableOutput("distTable")   
+        )
+      ),
+   # Q4
+      tabPanel("Which departments earn most?",
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(inputId = "YearQ4",
+                        label = "Select a Year:",
+                        choices = c("2013", "2014", "2015", "2016", "2017"),
+                        selected = "2017"),
+            sliderInput("nDepts",
+                        label = "Number of Departments Shown:",
+                        max = 10,
+                        min = 1,
+                        value = 5),
+            selectInput(inputId = "sumStat",
+                        label = "Select Summary Statistic:",
+                        choices = c("mean", "median"),
+                        selected = "mean")
+          ),
+          mainPanel = tableOutput("distTablesumStat")   
+        )
+      ),
+    # Q5
+      tabPanel("Which departments cost most?",
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(inputId = "YearQ5",
+                        label = "Select a Year:",
+                        choices = c("2013", "2014", "2015", "2016", "2017"),
+                        selected = "2017"),
+            sliderInput("nDeptsQ5",
+                        label = "Number of Departments Shown:",
+                        max = 10,
+                        min = 1,
+                        value = 5)
+          ),
+          mainPanel = tableOutput("distTableQ5")
+        )
+      ),
+    # Q6
+      tabPanel("Which departments earn the most Overtime Pay?",
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(inputId = "YearQ6",
+                        label = "Select a Year:",
+                        choices = c("2013", "2014", "2015", "2016", "2017"),
+                        selected = "2017"),
+            sliderInput("nDeptsQ6",
+                        label = "Number of Departments Shown:",
+                        max = 10,
+                        min = 1,
+                        value = 5)
+          ),
+          mainPanel = plotOutput("distPlotQ6")
         )
       )
-   )
+    )
 )
 
 # Define server logic required to draw a histogram
@@ -91,11 +134,11 @@ server <- function(input, output) {
        arrange(desc(Total.Payments)) %>%
        head( n = input$nTopEarners)
    })
-     # Q4
-   output$distTableQ4 <- renderTable({
-     if(input$Q4 == "mean") {
+     # Q4 sumStat
+   output$distTablesumStat <- renderTable({
+     if(input$sumStat == "mean") {
        LApayroll %>%
-         filter(Year == input$Year)%>%
+         filter(Year == input$YearQ4)%>%
          group_by(Department_Title) %>%
          summarise(
            Total = mean(Total.Payments),
@@ -107,7 +150,7 @@ server <- function(input, output) {
        head(input$nDepts)
      } else {
        LApayroll %>%
-         filter(Year == input$Year)%>%
+         filter(Year == input$YearQ4)%>%
          group_by(Department_Title) %>%
          summarise(
            Total = median(Total.Payments),
@@ -124,7 +167,7 @@ server <- function(input, output) {
    #  Q5
    output$distTableQ5 <- renderTable({
      LApayroll %>%
-       filter(Year == input$Year) %>%
+       filter(Year == input$YearQ5) %>%
        select(Department_Title, Avg.Ben.Cost, Total.Payments,
               Base.Pay, Other.Pay, OT.Pay) %>%
        group_by(Department_Title) %>%
@@ -134,19 +177,19 @@ server <- function(input, output) {
                  sumOther = sum(Other.Pay),
                  sumOT = sum(OT.Pay)) %>%
        arrange(desc(cost)) %>%
-       head(input$nDepts)
+       head(input$nDeptsQ5)
    })
    
     # Q6: Visualize the top OT earning Departments.
-   output$distPlotQ7 <- renderPlot({
+   output$distPlotQ6 <- renderPlot({
      LApayroll %>%
-       filter(Year == input$Year) %>%
+       filter(Year == input$YearQ6) %>%
        select(Department_Title, OT.Pay) %>%
          group_by(Department_Title) %>%
          summarise(
            OT = mean(OT.Pay)) %>%
          arrange(desc(OT)) %>%
-         head(input$nDepts) %>%
+         head(input$nDeptsQ6) %>%
          ggplot() +
          geom_col(mapping = aes(x = Department_Title, y = OT)) +
          coord_flip()
