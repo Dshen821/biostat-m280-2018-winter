@@ -1,6 +1,5 @@
 # Here we read in the payroll dataset and rename column names to exclude spaces.
-#  LAdata<- read.csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
-
+setwd(".")
 LAdata2 <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
 colnames(LAdata2) <- str_replace_all(names(LAdata2), " ", "_")
 colnames(LAdata2)[24] <- "Other_Paye"
