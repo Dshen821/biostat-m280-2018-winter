@@ -195,6 +195,101 @@ unitedStates
 0. LAX:
 
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
+```{r}
+#(a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
+laxFlights <-flights_tbl %>%
+  filter(origin == "LAX" | dest == "LAX") %>%
+  select(origin, dayofmonth, month, year) %>%
+  collect()
+
+#Subset Between 2008 and 1998 Years of LAX flights.
+laxFlightDate <- laxFlights %>%
+  mutate(date = make_date(year, month, dayofmonth)) %>%
+  filter(date >= ymd(19980101) & date <= ymd(20081231)) %>%
+  collect()
+
+# Create compressed RDS file.
+write_rds(laxFlightDate, "hw4/laxflightdates.rds")
+
+# Plot
+
+laxFlightDate %>%
+  group_by(date) %>%
+  count() %>%
+  ggplot(aes(x = date, y = n)) +
+  geom_line() +
+  geom_label(aes(x = ymd(20011230), y = 1110, label = "1")) +
+  geom_label(aes(x = ymd(20041201), y = 1000, label = "2")) +
+  geom_label(aes(x = ymd(20040630), y = 950, label = "3")) +
+  geom_label(aes(x = ymd(20080101), y = 1300, label = "4")) +
+  geom_label(aes(x = ymd(20010130), y = 1150, label = "5")) +
+  ggtitle("LAX air traffic") 
+
+ # Visualize prominent features.
+
+# Point 1
+laxFlightDate  %>%
+  group_by(date) %>%
+  filter(date >= ymd(20010901) & date <= ymd(20011201)) %>%
+  group_by(date) %>%
+  count() %>%
+  arrange(n) %>%
+  collect() %>%
+  ggplot(aes(x = date, y = n)) +
+  geom_line() +
+  ggtitle("Point 1")
+  
+  
+
+# Point 2
+laxFlightDate  %>%
+  group_by(date) %>%
+  filter(date >= ymd(20040731) & date <= ymd(20050101)) %>%
+  group_by(date) %>%
+  count() %>%
+  arrange(n) %>%
+  collect() %>%
+  ggplot(aes(x = date, y = n)) +
+  geom_line() +
+  ggtitle("Point 2")
+
+
+# Point 3
+laxFlightDate  %>%
+  group_by(date) %>%
+  filter(date >= ymd(20040301) & date <= ymd(20041101)) %>%
+  group_by(date) %>%
+  count() %>%
+  arrange(n) %>%
+  collect() %>%
+  ggplot(aes(x = date, y = n)) +
+  geom_line() +
+  ggtitle("Point 3")
+
+# Point 4
+laxFlightDate  %>%
+  group_by(date) %>%
+  filter(date >= ymd(20070928) & date <= ymd(20080130)) %>%
+  group_by(date) %>%
+  count() %>%
+  arrange(n) %>%
+  collect() %>%
+  ggplot(aes(x = date, y = n)) +
+  geom_line() +
+  ggtitle("Point 4")
+
+# Point 5
+laxFlightDate  %>%
+  group_by(date) %>%
+  filter(date >= ymd(20070928) & date <= ymd(20080130)) %>%
+  group_by(date) %>%
+  count() %>%
+  arrange(n) %>%
+  collect() %>%
+  ggplot(aes(x = date, y = n)) +
+  geom_line() +
+  ggtitle("Point 5")
+```
 
     (b). Visualize and explain seasonal effects.
   
