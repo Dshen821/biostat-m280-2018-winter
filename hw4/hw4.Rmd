@@ -292,10 +292,83 @@ laxFlightDate  %>%
 ```
 
     (b). Visualize and explain seasonal effects.
+```{r}
+
+flightsBySeason <-flights_tbl %>%
+  select(origin, dest, month, year) %>%
+  filter(year >= 1998 && year <= 2008) %>%
+  filter(dest == "LAX" | origin == "LAX") %>%
+  mutate(season = if_else(month %in% c(3, 4, 5), "spring",
+                          if_else(month %in% c(6, 7, 8), "summer",
+                                  if_else(month %in% c(9,10, 11), "fall",
+                                          if_else(month %in% c(12, 1, 2), "winter", "")
+                                          )
+                                  )
+                          )
+        ) %>%
+  #group_by(year, season) %>%
+  #tally() %>%
+  count(year, season) %>%
+  arrange(year) %>%
+  collect()
+
+ggplot(flightsBySeason) +
+  geom_col(aes(x = as.factor(year), y = n, fill = season),
+           color = "black") +
+  labs(x = "Year", y = "Number of Flights", title = "LAX Air Traffic by Season") +
+  scale_fill_brewer(palette = "Pastel2")
+```
   
     (c). Visualize and explain weekly effects.
+```{r}
+flightsByWeekday <- flights_tbl %>%
+  select(origin, dest, year, dayofweek) %>%
+  filter(year >= 1998 && year <= 2008) %>%
+  filter(dest == "LAX" | origin == "LAX") %>%
+  count(year, dayofweek) %>%
+  collect()
+
+flightsByWeekday$dayofweek<-as.factor(flightsByWeekday$dayofweek)
+ggplot(flightsByWeekday) +
+  geom_col(aes(x = as.factor(year), y = n, fill = dayofweek),
+           color = "black") +
+  labs(x = "Year", y = "Number of Flights", title = "LAX Air Traffic by Day of Week") +
+  scale_fill_brewer(palette = "Pastel2")
+
+
+```
   
     (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
+```{r}
+# Filter the routes by destination: LAX.
+topRoutes <-flights_tbl %>%
+  select(origin, dest) %>%
+  filter(origin == "LAX") %>%
+  collect() %>% 
+  count(dest) %>%
+  arrange(desc(n)) %>%
+  head(10)
+
+# Location Retrieval.
+destLAX <- topRoutes %>%
+  left_join(airports_tbl, by = c("dest" = "faa"), copy = TRUE) %>%
+  select(dest, lon, lat, n) %>%
+  mutate(lat = as.double(lat),
+         lon = as.double(lon)
+         ) %>%
+  mutate(airport = dest, proportion = n / sum(n))
+
+ggmap(map) +
+  geom_point(data = destLAX,
+             aes(x = lon, y = lat, size = proportion),
+             color = "black") +
+  geom_label_repel(data = destLAX,
+                   aes(x= lon, y = lat, label =  dest, size = proportion
+                   ), min.segment.length = 0, size = 3.5) +
+  labs(title = "Top 10 Locations from LAX")
+
+```
+    
     
 0. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
     
