@@ -80,7 +80,7 @@ busyUSports <- ggmap(map) +
   geom_label_repel(data = topTenLocations,
                    aes(x= lon, y = lat, label =  airport, size = proportion
                       ), min.segment.length = 0, size = 3.5) +
-  ggtitle("Busiest US Airports (Highest # of flights in/out) in 1991")
+  labs(title = " US Airports (Highest # of flights in/out) in 1991")
 busyUSports
 
 #Map the top 10 busiest direct routes.
@@ -319,20 +319,18 @@ topRoutes <-flights_tbl %>%
 
 # Location Retrieval.
 destLAX <- topRoutes %>%
-  inner_join(airports_tbl, by = c("dest" = "faa"), copy = TRUE) %>%
+  left_join(airports_tbl, by = c("dest" = "faa"), copy = TRUE) %>%
   select(dest, lon, lat, n) %>%
   mutate(lat = as.double(lat),
          lon = as.double(lon)
          ) %>%
-  mutate(airport = dest, proportion = n / sum(n)) %>%
-  collect()
+  mutate(airport = dest, proportion = n / sum(n))
 
-destLAX <- ggmap(map) +
+ggmap(map) +
   geom_point(data = destLAX,
              aes(x = lon, y = lat, size = proportion),
              color = "black") +
   geom_label_repel(data = destLAX,
                    aes(x= lon, y = lat, label =  dest, size = proportion
                    ), min.segment.length = 0, size = 3.5) +
-  ggtitle("Top 10 Locations from LAX")
-destLAX
+  labs(title = "Top 10 Locations from LAX")
