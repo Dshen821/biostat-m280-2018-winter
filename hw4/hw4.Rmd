@@ -68,7 +68,6 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     #Map the top 10 busiest airports. Size of dots should reflect the number of 
     #flights through that destination.
 
-
     # Determine the n count of flight origins
     originCount <- flights_tbl %>%
     filter(year == 1991) %>%
@@ -251,7 +250,8 @@ laxFlightDate %>%
   geom_label(aes(x = ymd(20040630), y = 950, label = "3")) +
   geom_label(aes(x = ymd(20080101), y = 1300, label = "4")) +
   geom_label(aes(x = ymd(20010130), y = 1150, label = "5")) +
-  ggtitle("LAX air traffic") 
+  ggtitle("LAX air traffic") +
+  coord_fixed()
 
  # Visualize prominent features.
 
@@ -266,8 +266,6 @@ laxFlightDate  %>%
   ggplot(aes(x = date, y = n)) +
   geom_line() +
   ggtitle("Point 1")
-  
-  
 
 # Point 2
 laxFlightDate  %>%
@@ -309,7 +307,7 @@ laxFlightDate  %>%
 # Point 5
 laxFlightDate  %>%
   group_by(date) %>%
-  filter(date >= ymd(20070928) & date <= ymd(20080130)) %>%
+  filter(date >= ymd(20001115) & date <= ymd(20010225)) %>%
   group_by(date) %>%
   count() %>%
   arrange(n) %>%
@@ -405,9 +403,8 @@ modelFlights <- flights_tbl %>%
     filter(depdelay > 15 & depdelay < 240) %>%
     filter(arrdelay > -60 & arrdelay < 360) %>%
     filter(year >= 2003 & year <= 2007) %>%
-    left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
     mutate(weekDay = as.character(dayofweek)) %>%
-    select(year, month, arrdelay, depdelay, distance, uniquecarrier, description, weekDay)
+    select(year, month, arrdelay, depdelay, distance, weekDay)
 )
 
 sampleSplit <- modelFlights %>%
@@ -425,9 +422,8 @@ LAX2008 <-flights_tbl %>%
   filter(depdelay > 15 & depdelay < 240) %>%
   filter(arrdelay > -60 & arrdelay < 360) %>%
   filter(year == 2008) %>%
-  left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
   mutate(weekDay = as.character(dayofweek)) %>%
-  select(year, month, arrdelay, depdelay, distance, uniquecarrier, description, weekDay)
+  select(year, month, arrdelay, depdelay, distance, weekDay)
 )
 
 #Determine prediction model.
