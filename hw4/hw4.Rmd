@@ -1,71 +1,100 @@
+```{r, echo = FALSE, eval = TRUE}
+    sessionInfo()
+```
 ---
-title: "Biostat M280 Homework 4"
-subtitle: Due Mar 16 @ 11:59PM
+title: "BIOSTAT-M280: Homework #4"
+author: "Darrick Shen (UID:604946049) "
+subtitle: Due Mar 16th @ 11:59PM
 output: html_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 Our Apache Yarn cluster hosts the [flights](http://stat-computing.org/dataexpo/2009/the-data.html) data representing 123 million flights over 22 years. Read the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) on how to access the Yarn cluster. Connect to the database using `sparklyr` and answer following questions. You can base your answers on a specific year or the whole data set.
 
 1. Map the top 10 busiest airports. Size of dots should reflect the number of flights through that destination.  
 Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html) helpful.
 
+
+    ```{r, echo = FALSE, eval = TRUE, include = FALSE}
+    # Here we are installing and loading all packages required.
+    
+    if (!"sparklyr" %in% rownames(installed.packages()))  
+      install.packages("sparklyr", repos = "http://cran.rstudio.com/")
+    
+    if (!"dplyr" %in% rownames(installed.packages()))  
+      install.packages("dplyr", repos = "http://cran.rstudio.com/")
+    
+    if (!"ggplot2" %in% rownames(installed.packages()))  
+      install.packages("ggplot2", repos = "http://cran.rstudio.com/")
+    
+    if (!"ggmap" %in% rownames(installed.packages()))  
+      install.packages("ggmap", repos = "http://cran.rstudio.com/")
+
+    if (!"maps" %in% rownames(installed.packages()))  
+      install.packages("maps", repos = "http://cran.rstudio.com/")
+    
+    if (!"mapdata" %in% rownames(installed.packages()))  
+      install.packages("mapdata", repos = "http://cran.rstudio.com/")
+    
+    if (!"ggrepel" %in% rownames(installed.packages()))  
+      install.packages("ggrepel", repos = "http://cran.rstudio.com/")
+
+    if (!"lubridate" %in% rownames(installed.packages()))  
+      install.packages("lubridate", repos = "http://cran.rstudio.com/")
+
+    library(sparklyr)
+    library(dplyr)
+    library(ggplot2)
+    library(ggmap)
+    library(maps)
+    library(mapdata)
+    library(ggrepel)
+    library(lubridate)
+
+    Sys.setenv(SPARK_HOME="/usr/lib/spark")
+    config <- spark_config()
+    sc <- spark_connect(master = "local", config = config)
+
+    flights_tbl <- tbl(sc,'flights')
+    airports_tbl <- tbl(sc, 'airports')
+    airlines_tbl <- tbl(sc, 'airlines')
+
+    #head(flights_tbl)
+    #head(airports_tbl)
+    #head(airlines_tbl)
+```
+
+
 ```{r}
- # Disconnect spark.
-
-library(sparklyr)
-library(dplyr)
-library(ggplot2)
-library(ggmap)
-library(maps)
-library(mapdata)
-library(ggrepel)
-
-Sys.setenv(SPARK_HOME="/usr/lib/spark")
-config <- spark_config()
-sc <- spark_connect(master = "local", config = config)
-
-flights_tbl <- tbl(sc,'flights')
-airports_tbl <- tbl(sc, 'airports')
-airlines_tbl <- tbl(sc, 'airlines')
-
-head(flights_tbl)
-head(airports_tbl)
-head(airlines_tbl)
-
-#Map the top 10 busiest airports. Size of dots should reflect the number of 
-#flights through that destination.
+    #Map the top 10 busiest airports. Size of dots should reflect the number of 
+    #flights through that destination.
 
 
-  # Determine the n count of flight origins
-originCount <- flights_tbl %>%
-  filter(year == 1991) %>%
-  group_by(origin) %>%
-  tally() %>%
-  arrange(desc(n)) %>%
-  collect() %>%
-  head(15)
-  # Determine the n count of flight destinations
-departureCount <- flights_tbl %>%
-  filter(year == 1991) %>%
-  group_by(dest) %>%
-  tally() %>%
-  arrange(desc(n)) %>%
-  collect() %>%
-  head(15)
+    # Determine the n count of flight origins
+    originCount <- flights_tbl %>%
+    filter(year == 1991) %>%
+    group_by(origin) %>%
+    tally() %>%
+    arrange(desc(n)) %>%
+    collect() %>%
+    head(15)
+    # Determine the n count of flight destinations
+    departureCount <- flights_tbl %>%
+    filter(year == 1991) %>%
+    group_by(dest) %>%
+    tally() %>%
+    arrange(desc(n)) %>%
+    collect() %>%
+    head(15)
 
-colnames(originCount) <- c("origin", "outgoing")
-colnames(departureCount) <- c("destination", "incoming")
+   colnames(originCount) <- c("origin", "outgoing")
+   colnames(departureCount) <- c("destination", "incoming")
 
   # Determine the "busiest" airports by summing incoming and outcoming flights.
-flightCount <-originCount %>%
+  flightCount <-originCount %>%
   inner_join(departureCount, by = c("origin" = "destination")) %>%
   transmute(airport = origin, totalFlights = incoming + outgoing) %>%
   arrange(desc(totalFlights)) %>%
-head(10)
+  head(10)
 
   # Location Retrieval.
 topTenLocations <- flightCount %>%
@@ -77,7 +106,7 @@ topTenLocations <- flightCount %>%
   collect()
 
   # Create compressed RDS  file.
-library(tidyverse)
+#library(tidyverse)
 ##write_rds(topTenLocations, "hw4/busiestAirports.rds")
 
   # Create a plot of the US MAP.
@@ -96,7 +125,6 @@ busyUSports <- ggmap(map) +
                       ), min.segment.length = 0, size = 3.5) +
   ggtitle("Busiest US Airports (Highest # of flights in/out) in 1991")
 busyUSports
-
 
 ```
 
@@ -195,6 +223,7 @@ unitedStates
 0. LAX:
 
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
+    
 ```{r}
 #(a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
 laxFlights <-flights_tbl %>%
@@ -209,8 +238,7 @@ laxFlightDate <- laxFlights %>%
   collect()
 
 # Create compressed RDS file.
-write_rds(laxFlightDate, "hw4/laxflightdates.rds")
-
+#write_rds(laxFlightDate, "hw4/laxflightdates.rds")
 # Plot
 
 laxFlightDate %>%
@@ -391,7 +419,7 @@ summary(mlr)
 
 # Apply MLR to LAX flight data in 2018.
 system.time(
-LAX2018 <-flights_tbl %>%
+LAX2008 <-flights_tbl %>%
   filter(origin == "LAX") %>%
   filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
   filter(depdelay > 15 & depdelay < 240) %>%
@@ -404,7 +432,7 @@ LAX2018 <-flights_tbl %>%
 
 #Determine prediction model.
 
-predictionVal2008 <- sdf_predict(LAX2018, mlr) %>%
+predictionVal2008 <- sdf_predict(LAX2008, mlr) %>%
   mutate(squareRes = (prediction - arrdelay)^2) %>%
   collect
 
@@ -430,7 +458,45 @@ PredictionData <- predictionVal2008 %>%
 
 
 ```{r}
-spark_disconnect_all()
+  #Map the top 10 Origins to SFO in 1991.
+  
+  topSF <-flights_tbl %>%
+    filter(year == 1991 & dest == "SFO") %>%
+    group_by(origin, dest) %>%
+    summarize(n = n()) %>%
+    arrange(desc(n)) %>%
+    collect() %>%
+    head(10)
+  
+  # Retrieve latitude and longitide of origin and dest
+  
+  topTenSF <- topSF %>%
+    inner_join(airports_tbl, by = c("origin" = "faa"), copy = TRUE) %>%
+    select(origin, dest, lat, lon, name,n) %>%
+    mutate(latO = as.double(lat),
+           lonO = as.double(lon)) %>%
+    collect()
+  
+  usmap <- map_data("usa")
+  states <- map_data("state")
+  SFOflights <- ggplot(data = states) +
+    geom_polygon(aes(x = long, y = lat, fill = region, group = group), color = "white") + 
+    coord_fixed(1.3) +
+    geom_point(data = topTenSF,
+               aes(x = lonO, y = latO, size = n),
+               colour = "red", alpha = 0.3) +
+    geom_point(data = topTenSF,
+               aes(x = -122.375, y = 37.61899948120117),
+               colour = "red", alpha = 0.2)+
+    geom_curve(data = topTenSF,
+               aes(x = lonO, y = latO, xend = -122.375, yend = 37.61899948120117),    
+               arrow = arrow(angle = 15, length = unit(0.5, "cm"), type = "closed"),
+               alpha = 0.7, inherit.aes = TRUE) +
+    scale_size_continuous(range=c(1,30)) +
+    coord_cartesian() +
+    guides(fill = FALSE) +
+    ggtitle("Top 10 Flight Origins to SFO in 1991")
+  SFOflights
 ```
 
   
