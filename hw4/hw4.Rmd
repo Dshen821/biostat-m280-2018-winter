@@ -366,11 +366,65 @@ ggmap(map) +
                    aes(x= lon, y = lat, label =  dest, size = proportion
                    ), min.segment.length = 0, size = 3.5) +
   labs(title = "Top 10 Locations from LAX")
-
 ```
-    
-    
 0. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
+```{r}
+# Select data from an out of time sample
+system.time(
+modelFlights <- flights_tbl %>%
+    filter(origin == "LAX") %>%
+    filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+    filter(depdelay > 15 & depdelay < 240) %>%
+    filter(arrdelay > -60 & arrdelay < 360) %>%
+    filter(year >= 2003 & year <= 2007) %>%
+    left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+    mutate(weekDay = as.character(dayofweek)) %>%
+    select(year, month, arrdelay, depdelay, distance, uniquecarrier, description, weekDay)
+)
+
+sampleSplit <- modelFlights %>%
+      sdf_partition(train = 0.8, valid = 0.2, seed= 250)
+
+mlr <- sampleSplit$train %>%
+  ml_linear_regression(arrdelay ~ distance + depdelay + weekDay)
+summary(mlr)
+
+# Apply MLR to LAX flight data in 2018.
+system.time(
+LAX2018 <-flights_tbl %>%
+  filter(origin == "LAX") %>%
+  filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+  filter(depdelay > 15 & depdelay < 240) %>%
+  filter(arrdelay > -60 & arrdelay < 360) %>%
+  filter(year == 2008) %>%
+  left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+  mutate(weekDay = as.character(dayofweek)) %>%
+  select(year, month, arrdelay, depdelay, distance, uniquecarrier, description, weekDay)
+)
+
+#Determine prediction model.
+
+predictionVal2008 <- sdf_predict(LAX2018, mlr) %>%
+  mutate(squareRes = (prediction - arrdelay)^2) %>%
+  collect
+
+# Calculate Root Mean Squared Error.
+rootmse <- sqrt(sum(predictionVal2008$squareRes)/count(predictionVal2008))
+rootmse
+
+# Visualize actual arrival delay against predicted arrival delay.
+
+PredictionData <- predictionVal2008 %>%
+    group_by(weekDay) %>%
+    summarize(actual = mean(arrdelay), prediction = mean(prediction), freq = n())
+
+  # Plot
+  ggplot(PredictionData, aes(actual, prediction)) + 
+  geom_point(alpha = 0.75, color = 'red', shape = 3) +
+  geom_abline(intercept = 0, slope = 1, alpha = 0.15, color = 'blue') +
+  geom_text(aes(label = substr(weekDay, 1, 20)), size = 3, alpha = 0.75, vjust = -1) +
+  labs(title='Actual arrival Delay on Predicted Delay', x = 'Actual', y = 'Predicted')
+```
     
 0. Visualize and explain any other information you want to explore.
 
