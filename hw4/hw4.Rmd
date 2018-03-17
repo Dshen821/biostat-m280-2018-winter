@@ -111,7 +111,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     # usmap <- map_data("usa")
     
     states <- map_data("state")
-    map <- get_map(location = "united states", zoom = 4)
+    map <- get_googlemap(location = "united states", zoom = 4)
 
     busyUSports <- ggmap(map) +
       geom_point(data = topTenLocations,
@@ -127,13 +127,14 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     busyUSports
     ```
 
-Here we are presenting the top 10 busiest airports, with the size of dots reflecting the nmber of flights through that destination. How "Busy" an airport is, is determined through summing the total flight originating and the total flights incoming that airport. In descending order of flights: 
+    Here we are presenting the top 10 busiest airports, with the size of dots reflecting the nmber of flights through that destination. How "Busy" an airport is, is determined through summing the total flight originating and the total flights incoming that airport. In descending order of flight number: ORD, DFW, ATL, LAX, DEN, PHX, SFO, CLT, STL, DTW.
 
 2) Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.
 
     ```{r, echo = TRUE, eval = TRUE}
 
-    # Determine the busiest routes in 2002 by filtering by year then grouping by origin and        # destination.
+    # Determine the busiest routes in 2002 by filtering by year then grouping by origin and        
+    # destination.
     topRoutes <- flights_tbl %>%
       filter(year == 2002) %>%
       group_by(origin, dest) %>%
@@ -174,30 +175,10 @@ Here we are presenting the top 10 busiest airports, with the size of dots reflec
     q2Sliced3 <- q2 %>%
         slice(c(1:6,8))
 
-  # Google map.
-    map <- get_googlemap(location = "united states", zoom = 4)
-    ggmap(map) +
-      geom_point(data = q2,
-                 aes(x = lonO, y = latO),
-                 colour = "red", alpha = 0.2) +
-      geom_point(data = q2,
-                 aes(x = lonD, y = latD),
-                 colour = "red", alpha = 0.2)+
-      geom_curve(data = q2,
-                 aes(x = lonO, y = latO, xend = lonD, yend = latD),    
-                 arrow = arrow(angle = 15,
-                               ends = "first",
-                               length = unit(0.2, "cm"),
-                               type = "closed"),
-                 alpha = 0.7,
-                 curvature = 0.15,
-                 inherit.aes = TRUE) +
-      scale_size_continuous(range = c(1, 30)) +
-      coord_cartesian()
-
    # Simple US map.
     unitedStates <- ggplot(data = states) +
-    geom_polygon(aes(x = long, y = lat, fill = region, group = group), color = "white") + 
+    geom_polygon(aes(x = long, y = lat,
+                     fill = region, group = group), color = "white") + 
     coord_fixed(1.3) +
     geom_point(data = q2,
                aes(x = lonO, y = latO),
@@ -212,10 +193,11 @@ Here we are presenting the top 10 busiest airports, with the size of dots reflec
                              ends = "first",
                              length = unit(0.5, "cm"),
                              type = "closed"),
-               alpha = 0.7, curvature = 0.15, size = q2$scale, inherit.aes = TRUE) +
+               alpha = 0.7, curvature = 0.15,
+               size = q2$scale, inherit.aes = TRUE) +
       scale_size_continuous(range=c(1,30)) +
       coord_cartesian() +
-      guides(fill=FALSE) +
+      guides(fill = FALSE) +
       geom_label_repel(data = q2Sliced,
                        aes(x= lonO, y = latO,
                            label = q2Sliced$origin,
@@ -225,7 +207,7 @@ Here we are presenting the top 10 busiest airports, with the size of dots reflec
     unitedStates
     ```
 
-Here we are displaying the top 10 busiest direct route, with the size of the lines reflecting the number of flights through that route.
+Here we are displaying the top 10 busiest direct routes in the United States in the year 2002, with the size of the lines reflecting the number of flights through that route.
 
 3) LAX:
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
@@ -242,10 +224,10 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
       filter(date >= ymd(19980101) & date <= ymd(20081231)) %>%
       collect()
 
-  # Create compressed RDS file.
-  # write_rds(laxFlightDate, "hw4/laxflightdates.rds")
+    # Create compressed RDS file.
+    # write_rds(laxFlightDate, "hw4/laxflightdates.rds")
   
-  # Plot
+    # Plot
     laxFlightDate %>%
       group_by(date) %>%
       count() %>%
@@ -259,9 +241,9 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
         ggtitle("LAX air traffic") +
         coord_fixed()
 
-  # Visualize prominent features:
-  # Point 1
-    laxFlightDate  %>%
+    # Visualize prominent features:
+    # Point 1
+    laxFlightDate %>%
       group_by(date) %>%
       filter(date >= ymd(20010901) & date <= ymd(20011201)) %>%
       group_by(date) %>%
@@ -271,10 +253,10 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
       ggplot(aes(x = date, y = n)) +
         geom_line() +
         ggtitle("Point 1") +
-        geom_label(aes(x = ymd(20011230), y = 1110, label = "1"))
+        geom_label(aes(x = ymd(20010918), y = 1220, label = "1"))
 
-  # Point 2
-    laxFlightDate  %>%
+    # Point 2
+    laxFlightDate %>%
       group_by(date) %>%
       filter(date >= ymd(20040731) & date <= ymd(20050101)) %>%
       group_by(date) %>%
@@ -284,11 +266,11 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
       ggplot(aes(x = date, y = n)) +
         geom_line() +
         ggtitle("Point 2") +
-        geom_label(aes(x = ymd(20041125), y = 1000, label = "2"))
+        geom_label(aes(x = ymd(20041125), y = 1020, label = "2"))
 
 
 # Point 3
-    laxFlightDate  %>%
+    laxFlightDate %>%
       group_by(date) %>%
       filter(date >= ymd(20040301) & date <= ymd(20041101)) %>%
       group_by(date) %>%
@@ -298,10 +280,10 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
       ggplot(aes(x = date, y = n)) +
         geom_line() +
         ggtitle("Point 3") +
-        geom_label(aes(x = ymd(20040704), y = 1040, label = "3"))
+        geom_label(aes(x = ymd(20040704), y = 1070, label = "3"))
 
   # Point 4
-  laxFlightDate  %>%
+  laxFlightDate %>%
     group_by(date) %>%
     filter(date >= ymd(20070928) & date <= ymd(20080130)) %>%
     group_by(date) %>%
@@ -311,10 +293,10 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
     ggplot(aes(x = date, y = n)) +
       geom_line() +
       ggtitle("Point 4") +
-      geom_label(aes(x = ymd(20080101), y = 1300, label = "4"))
+      geom_label(aes(x = ymd(20080121), y = 1250, label = "4"))
 
   # Point 5
-    laxFlightDate  %>%
+    laxFlightDate %>%
       group_by(date) %>%
       filter(date >= ymd(20001115) & date <= ymd(20010225)) %>%
       group_by(date) %>%
@@ -322,25 +304,26 @@ Here we are displaying the top 10 busiest direct route, with the size of the lin
       arrange(n) %>%
       collect() %>%
       ggplot(aes(x = date, y = n)) +
-    geom_line() +
-    ggtitle("Point 5") +
-    geom_label(aes(x = ymd(20010130), y = 1150, label = "5"))
+        geom_line() +
+        ggtitle("Point 5") +
+        geom_label(aes(x = ymd(20010101), y = 1150, label = "5"))
     ```
 
-The first point shows a sudden drop approximately during the time of 9/11, when the Twin Towers in New York were destroyed by terrorist attack. Airport security measures became more stringent subsequently, and Americans also developed reservations towards traveling via airplane for some time after. It was not until 2004-2005 that flights rebounded to previous levels.
+    The first point shows a sudden drop approximately during the time of September 11th, 2001, when the Twin Towers in New York were destroyed by terrorist attack. Airport security measures became more stringent subsequently, and Americans also developed reservations towards traveling via airplane for some time after. It was not until 2004-2005 that flights rebounded to previous levels.
 
-Points 2 and 3 correspond with Thanksgiving and July 4th respectively. During this time people are generally already at the location they are wanting to travel to and are celebrating with their friends and family.
+    Points 2 and 3 correspond with Thanksgiving and July 4th respectively. During this time people are generally already at the location they are wanting to travel to and are celebrating with their friends and family.
 
-Point 4 shows a drop in flights as it occurs during the 2007 to 2008 financial crisis, commonly known as one of the worst economic downturns since the Great Depression. Individuals may of traveled less during that time due to being unable to finance their trips/vacations.
+    Point 4 shows a drop in flights as it occurs during the 2007 to 2008 financial crisis, commonly known as one of the worst economic downturns since the Great Depression. Individuals may of traveled less during that time due to being unable to finance their trips/vacations.
 
-Point 5 begins to show an increase in flights as after Christmas/New Years time as they are returning from vacation to their residence/work places.
+    Point 5 begins to show an increase in flights as after Christmas/New Years time as people are returning from vacation to their residence/work places.
 
 
-    (b). Visualize and explain seasonal effects.
+    (b). Visualize and explain seasonal effects.  
+    
     
     ```{r, echo = TRUE, eval = TRUE}
 
-    flightsBySeason <-flights_tbl %>%
+    flightsBySeason <- flights_tbl %>%
       select(origin, dest, month, year) %>%
       filter(year >= 1998 && year <= 2008) %>%
       filter(dest == "LAX" | origin == "LAX") %>%
@@ -354,18 +337,20 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
         arrange(year) %>%
         collect()
 
-    ggplot(flightsBySeason) +
-      geom_col(aes(x = as.factor(year),
-                   y = n, fill = season),
-               color = "black") +
-      labs(x = "Year", y = "Number of Flights",
-           title = "LAX Air Traffic by Season") +
-      scale_fill_brewer(palette = "Pastel2")
+      ggplot(flightsBySeason) +
+        geom_col(aes(x = as.factor(year),
+                     y = n, fill = season),
+                 color = "black") +
+        labs(x = "Year", y = "Number of Flights",
+             title = "LAX Air Traffic by Season") +
+        scale_fill_brewer(palette = "Pastel2")
     ```
   
-  From the stacked barplot we can see that by year, the most flights at LAX occur during the summer. Fall and Winter seasons appear to have the least amount of flights at LAX. Intuitively this happens because more people travel during the summertime for vacation/break. Whereas during the Winter, people are more prone to settling in their place of residence or place of vacation. In general among years, the total number of flights in/out of LAX is not significantly different.
+    From the stacked barplot we can see that by year, the most flights at LAX occur during the summer. Fall and Winter seasons appear to have the least amount of flights at LAX. Intuitively this happens because more people travel during the summertime for vacation/break. Whereas during the Winter, people are more prone to settling in their place of residence or place of vacation. In general among years, the total number of flights in/out of LAX is not significantly different.  
+    
   
-    (c). Visualize and explain weekly effects.
+    (c). Visualize and explain weekly effects.  
+    
     
     ```{r, echo = TRUE, eval = TRUE}
     flightsByWeekday <- flights_tbl %>%
@@ -391,9 +376,9 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
 
     ```
   
-  From the stacked barplot we see that Saturday has the least amount of flights, followed by Sunday. Monday and Friday have slightly more flights than the rest of the weekdays. This makes sense because people typically fly to their vacation spots before or after the weekend, so they can spend their weekend there.
-  
-    (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
+    From the stacked barplot we see that Saturday has the least amount of flights, followed by Sunday. Monday and Friday have slightly more flights than the rest of the weekdays. This makes sense because people typically fly to their vacation spots before or after the weekend, so they can spend their weekend there. There does not seem to be much variation in the distribution of flights by weekday, throughout the years.  
+    
+    (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.  
     
     ```{r, echo = TRUE, eval = TRUE}
     # Filter the routes by destination: LAX.
@@ -423,10 +408,14 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
       labs(title = "Top 10 Locations from LAX")
     ```
     
+    The plot above illustrates the top destinations leaving from LAX, with the size of the dots reflecting the flight number. In descending order of flight number: SFO, LAS, PHX, OAK, ORD, SAN, SJC, SEA, JFK, DFW.
+    
+    
+    
 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
 
     ```{r, echo = FALSE, eval = TRUE}
-    # Select data from an out of time sample
+    # Select data from an out of time sample.
     system.time(
     modelFlights <- flights_tbl %>%
       filter(origin == "LAX") %>%
@@ -437,17 +426,16 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
       mutate(weekDay = as.character(dayofweek)) %>%
         select(year, month, arrdelay,
                depdelay, distance, weekDay, actualelapsedtime))
-
+    # Split in to validation and training set.
     sampleSplit <- modelFlights %>%
       sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
-    
+    # MLR of Arrival delay on distance, departure delay, week day, and actual elapsed time.
     mlr <- sampleSplit$train %>%
       ml_linear_regression(arrdelay ~ distance + depdelay +
                            weekDay + actualelapsedtime)
     summary(mlr)
 
     # Apply MLR to LAX flight data in 2018.
-    
     LAX2008 <- flights_tbl %>%
       filter(origin == "LAX") %>%
       filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
@@ -461,7 +449,7 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
 
     # Determine prediction model.
     predictionVal2008 <- sdf_predict(LAX2008, mlr) %>%
-      mutate(squareRes = (prediction - arrdelay)^2) %>%
+      mutate(squareRes = (prediction - arrdelay) ^ 2) %>%
       collect
 
     # Calculate Root Mean Squared Error.
@@ -507,11 +495,10 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
 
     ```
     
-    Our predictive model predicts the arrival delay of flights from LAX, based on the predictive variables distance departure delay, day of the week, and actual elapsed time. We filter our original data set from a larger subset of years and compared training data and validation data by decile. The bar chart shows the average arrival delay was relatively close. We can compare the model
-    A good model should reflect RMSE values similar for the training and test sets of data. A much higher RMSE for the testing set than the training set suggests badly over fit data.
+    Our predictive model predicts the arrival delay of flights from LAX, based on the predictive variables distance departure delay, day of the week, and actual elapsed time. We filter our original data set from a larger subset of years and compared training data and validation data by decile. The Decile Plot shows training and validation data for average arrival delay of flights matches fairly well. The scatterplot shows that the testing data has a predicted average delay greater than the actual delay time of flights for our model.
     
-  The scatterplot shows that the testing data has a predicted average delay greater than the actual delay time from our model. The Decile Plot shows that the predicted values and actual values based on the validation data match fairly well.
-  
+    The root MSE based on the training data was approximately 7.71, while the root MSE of the test data set was slightly higher at 8.15. A good model should reflect RMSE values similar for the training and test sets of data. A much higher RMSE for the testing set than the training set suggests badly over fit data.
+ 
 5. Visualize and explain any other information you want to explore.
 
 
@@ -530,8 +517,7 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
       inner_join(airports_tbl, by = c("origin" = "faa"), copy = TRUE) %>%
       select(origin, dest, lat, lon, name, n) %>%
       mutate(latO = as.double(lat),
-             lonO = as.double(lon)) %>%
-      collect()
+             lonO = as.double(lon)) 
   
     usmap <- map_data("usa")
     states <- map_data("state")
@@ -542,23 +528,29 @@ Point 5 begins to show an increase in flights as after Christmas/New Years time 
       geom_point(data = topTenSF,
                  aes(x = lonO, y = latO, size = n),
                  colour = "red", alpha = 0.3) +
-      geom_point(data = topTenSF,
-                 aes(x = -122.375, y = 37.61899948120117),
-                 colour = "red", alpha = 0.2) +
       geom_curve(data = topTenSF,
-                 aes(x = lonO,
-                     y = latO, xend = -122.375,
-                     yend = 37.61899948120117),
+                 aes(x = lonO, y = latO,
+                     xend = -122.375, yend = 37.61899948120117),
                  arrow = arrow(angle = 15,
                                length = unit(0.5, "cm"),
                                type = "closed"),
                  alpha = 0.7, inherit.aes = TRUE) +
-      scale_size_continuous(range = c(1, 30)) +
       coord_cartesian() +
       guides(fill = FALSE) +
-      ggtitle("Top 10 Flight Origins to SFO in 1991")
+      geom_label_repel(data = topTenSF,
+                       aes(x= lonO, y = latO,
+                           label = topTenSF$origin,
+                           size = 2),
+                       min.segment.length = 0, size = 3.5) +
+      labs(title = "Top 10 Flight Origins to SFO in 1991")
     SFOflights
     ```
 
-I have interest in visualizing the top flight locations that fly toward San Francisco.
+    I have interest in visualizing the top flight locations that fly toward my home town: San Francisco (SFO), in 1991. In descending order of number of flights: LAX, SEA, SAN, ORD, PHX, PDX, SNA, DFW, LAS, DEN.  
+
+
+    ```{r}
+    spark_disconnect_all()
+    ```
+
   
